@@ -3,6 +3,7 @@ BIN_C	= test.c \
 		  ec.c \
 		  gp.c \
 		  bitstream.c \
+		  util.c
 
 LIB_NAME = 
 LIB_C   = 
