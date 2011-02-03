@@ -1,13 +1,32 @@
 #include "ec.h"
 #include "gp.h"
 #include "bitstream.h"
+#include "symbolinfo.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
 
+
 int main(int argc, char** argv)
 {
+
+
+
+	si_init_codewords();
+	int i;
+	for (i = 0; i < 40; i++) {
+		printf("%d: %d, %d, %d\n", i+1, cw[i].totalCodeWords, cw[i].ecCodeWords[0], cw[i].dataCodeWords[0]);
+	}
+
+
+
+
+
+
+
+
+	return 0;
 
 	bitstream* bs = bs_init();
 
@@ -70,4 +89,3 @@ int main(int argc, char** argv)
 
 	return 0;
 }
-
