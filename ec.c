@@ -8,34 +8,41 @@
 
 static int initialized = 0;
 static byte galois[256];
+
+/* QR Code uses pp=285 for the galois field calculation */
 static const int PP = 285;
 
 
-int generateErrorCorrectionCode(const byte* const data, size_t dataSize, byte* dest, size_t ecBlocks)
+int generateErrorCorrectionCode(const byte* const data, int dataSize, byte* dest, int ecBlocks)
 {
 	if (!data || !dest) return 0;
+
+	/* first get de Generator Polinomial */
 	const byte* gp = get_gp(ecBlocks);
 	if (!gp) return 0;
 
-	size_t totalSize = dataSize + ecBlocks;
-	size_t i;
+	int totalSize = dataSize + ecBlocks;
+	int i;
 	byte* errorCorrection = (byte*)calloc(totalSize, sizeof(char));
 
+	/* put the data in the first elements of the errrCorrection Array */
 	for (i = 0; i < dataSize; i++) {
 		errorCorrection[i] = data[i];
 	}
 
+	/* for every element of data, add the alphas from the data-array with the generator polinomial, 
+	 * and XOR its primitive Value with the current dataElement */
 	for (i = 0; i < dataSize; i++) {
-		byte add = petoal(errorCorrection[i]);
-		size_t j;
+		byte add = petoal(errorCorrection[i]); /* alpha value of first dataBlock that is not 0*/
+		int j;
 		for (j = 0; j < ecBlocks+1; j++) {
 			unsigned int alpha = add + gp[j];
-			if (alpha >255U) alpha -= 255U;
+			if (alpha >255U) alpha -= 255U; // alpha mustn't overflow
 			errorCorrection[j+i] = altope(alpha) ^ errorCorrection[j+i];
 		}
 	}
 
-	memcpy(dest, errorCorrection + dataSize, ecBlocks);
+	memcpy(dest, errorCorrection + dataSize, ecBlocks); //copy the errorCorrection Codes to the output Parameter
 
 	free(errorCorrection);
 
@@ -52,7 +59,7 @@ void calculate_galois_field(const int pp)
 	galois[0] = 1;
 	for (i = 1; i < 256; i++) {
 		x *= 2;	
-		if (x>255U) x ^= pp;
+		if (x>255U) x ^= pp; // if it over flows, XOR with pp, so it's never over 255
 		galois[i] = (byte) x;
 	}
 	initialized = 1;

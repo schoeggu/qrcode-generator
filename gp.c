@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-byte** gp;
+byte** gp = 0;
 static int gp_initialized = 0;
 
 void initialize_gp()
@@ -20,10 +20,12 @@ void initialize_gp()
 	char delim[] = " ";
 	char* number;
 	while (fgets(buffer, 256, file) != NULL) {
+		/* first number of line is the number of ErrorCorrectionBlocks for the Polynomial */
 		number = strtok(buffer, delim);
 		int rNum = atoi(number);
 		int num = 0;
  
+		/* after that, the alpha^n values are listed */
 		gp[rNum-1] = malloc(rNum+1);
 		while ((number = strtok(NULL, delim)) != NULL ) {
 			gp[rNum-1][num] = (byte)atoi(number);
@@ -58,7 +60,7 @@ const byte* get_gp(unsigned int numBlocks)
 	if (!gp_initialized) {
 		initialize_gp();
 	}
-	numBlocks--;
+	numBlocks--; //array index starts with 0, numBlocks with 1
 	if (numBlocks < 68) return gp[numBlocks];
 	return NULL;
 }

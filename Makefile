@@ -3,12 +3,13 @@ BIN_C	= test.c \
 		  ec.c \
 		  gp.c \
 		  bitstream.c \
-		  util.c
+		  util.c \
+		  dataencoder.c
+
 
 LIB_NAME = 
 LIB_C   = 
 
-GENFILES =
 DEPENDFILE = .depend
 
 
@@ -26,7 +27,7 @@ CC = cc
 
 CFLAGS += -Wall 
 CFLAGS += -ggdb
-CFLAGS += -fPIC
+#CFLAGS += -fPIC
 CFLAGS += -I/usr/include/c++/4.1.0
 CFLAGS += $(PKGCONFIGCFLAGS)
 
@@ -34,23 +35,18 @@ ifdef O
 CFLAGS += -O$O
 endif
 
-CPPFLAGS += $(CFLAGS)
+#CPPFLAGS += $(CFLAGS)
 
 CFLAGS +=
-CPPFLAGS +=
 
-LDFLAGS += $(PKGCONFIGLIBS)
+#LDFLAGS += $(PKGCONFIGLIBS)
 
-YYFLAGS = -d
-YYFLAGS += -v
-
-.PHONY : clean all genfiles depend
+.PHONY : clean all depend
 
 all : bin lib
 bin : $(DEPENDFILE) $(BIN)
 lib : $(DEPENDFILE) $(LIB)
 depend : $(DEPENDFILE) $(SRC)
-genfiles: $(GENFILES)
 
 $(BIN) : $(LIB) $(BIN_OBJ) 
 	$(CC) $(LDFLAGS) -o $@ $^

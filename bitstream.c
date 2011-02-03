@@ -4,14 +4,20 @@
 #include <stdio.h>
 #include <string.h>
 
+/*
+ * private function,
+ * adds a byte to the bitstream
+ */
+void bs_add_internal(bitstream* bs, byte data, int numBits);
+
 bitstream* bs_init()
 {
 	bitstream* bs = malloc(sizeof(bitstream));
 	bs->size = 0;
-	bs->buffersize = 4;
+	bs->buffersize = 4; /*start with 4 bytes*/
 	bs->buffer = calloc(sizeof(byte), bs->buffersize);
 	return bs;
-}		
+}
 
 void bs_destroy(bitstream* bs) 
 {
@@ -19,31 +25,35 @@ void bs_destroy(bitstream* bs)
 	free(bs);
 }
 
-void bs_add_b(bitstream* bs, byte data, size_t numBits)
+void bs_add_b(bitstream* bs, byte data, int numBits)
 {
 	
-	data = reverse_bit_b(data);
+	data = reverse_bit_b(data); /*reverse bit order, otherwise data order is wrong*/
 	data >>= (sizeof(data)*8 - numBits);
 	bs_add_internal(bs, data, numBits);
 }
 
-void bs_add_bs(bitstream* bs, byte* data, size_t dataSize, size_t numBits)
+void bs_add_bs(bitstream* bs, const byte* data, int dataSize, int numBits)
 {
 	if (!data) return;
 
+	/* for every byte call bs_add_b() */
 	while(numBits > 8 && dataSize) {
 		bs_add_b(bs, *data, 8);
 		data++;
 		numBits -=8;
 		dataSize--;
 	}
+	/* if we have trailing bits, add them too */
 	if (dataSize) bs_add_b(bs, *data, numBits);
 
 }
 
-void bs_add_i(bitstream* bs, unsigned int data, size_t numBits) {
-	data = reverse_bit_i(data);
+void bs_add_i(bitstream* bs, unsigned int data, int numBits) {
+	data = reverse_bit_i(data);/*reverse bit order, otherwise data order is wrong*/
 	data >>= (sizeof(data)*8 - numBits);
+
+	/* add one byte after the other */
 	while (numBits > 8) {
 		bs_add_internal(bs, (byte)data, 8);
 		data >>= 8;
@@ -52,10 +62,11 @@ void bs_add_i(bitstream* bs, unsigned int data, size_t numBits) {
 	bs_add_internal(bs, (byte)data, numBits);
 }
 
-void bs_add_internal(bitstream* bs, byte data, size_t numBits) 
+void bs_add_internal(bitstream* bs, byte data, int numBits) 
 {
 	int i;
 
+	/* if nescessary allocate new memory */
 	if (bs->buffersize * 8 < bs->size + numBits) {
 		bs->buffersize++;
 		bs->buffer = realloc(bs->buffer, bs->buffersize);
@@ -69,11 +80,13 @@ void bs_add_internal(bitstream* bs, byte data, size_t numBits)
 	
 	for (i = 0; i < numBits; i++) mask = (mask << 1) | 1;
 
+	/* first, fill up the last byte of buffer */
 	if (trailingbits) {
 	   	bs->buffer[numBytes] |= ((mask & data) << trailingbits); 
 		if (numBits+trailingbits >= 8) bs->buffer[numBytes] = reverse_bit_b(bs->buffer[numBytes]);
 		numBytes++;
    	}
+	/* then, put the rest to the next byte */
 	if (numBits - trailingbits > 0) {
 		bs->buffer[numBytes] |= (byte)((mask & data) >> (trailingbits ? 8 - trailingbits : 0));
 		if (numBits - trailingbits == 8) bs->buffer[numBytes] = reverse_bit_b(bs->buffer[numBytes]);
@@ -83,13 +96,13 @@ void bs_add_internal(bitstream* bs, byte data, size_t numBits)
 
 }
 
-byte bs_get(bitstream* bs, size_t index)
+byte bs_get(bitstream* bs, int index)
 {
 	if (index * 8 >= bs->size) return 0;
 	return bs->buffer[index];
 }
 
-void  bs_geta(bitstream* bs, byte* dest, size_t index, size_t numBytes)
+void  bs_geta(bitstream* bs, byte* dest, int index, int numBytes)
 {
 	if (!dest || !bs || index*8 >= bs->size) return;	
 
