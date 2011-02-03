@@ -12,7 +12,7 @@
 /*
  *	generate <ecBlocks> Error Correction Blocks from <data> and save it in <dest>
  */
-int generateErrorCorrectionCode(const byte* const data, int dataSize, byte* dest, int ecBlocks);
+bool generateErrorCorrectionCode(const byte* const data, int dataSize, byte* dest, int ecBlocks);
 
 /*
  * A galois field is needed 

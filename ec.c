@@ -6,20 +6,20 @@
 #include <string.h> 
 #include <stdlib.h> 
 
-static int initialized = 0;
+static bool initialized = false;
 static byte galois[256];
 
 /* QR Code uses pp=285 for the galois field calculation */
 static const int PP = 285;
 
 
-int generateErrorCorrectionCode(const byte* const data, int dataSize, byte* dest, int ecBlocks)
+bool generateErrorCorrectionCode(const byte* const data, int dataSize, byte* dest, int ecBlocks)
 {
 	if (!data || !dest) return 0;
 
 	/* first get de Generator Polinomial */
 	const byte* gp = get_gp(ecBlocks);
-	if (!gp) return 0;
+	if (!gp) return false;
 
 	int totalSize = dataSize + ecBlocks;
 	int i;
@@ -46,7 +46,7 @@ int generateErrorCorrectionCode(const byte* const data, int dataSize, byte* dest
 
 	free(errorCorrection);
 
-	return 1;
+	return true;
 }
 
 
@@ -62,7 +62,7 @@ void calculate_galois_field(const int pp)
 		if (x>255U) x ^= pp; // if it over flows, XOR with pp, so it's never over 255
 		galois[i] = (byte) x;
 	}
-	initialized = 1;
+	initialized = true;
 }
 
 byte altope(const int alpha) {

@@ -1,10 +1,11 @@
 BIN = galois
 BIN_C	= test.c \
+		  symbolinfo.c \
+		  dataencoder.c \
+		  bitstream.c \
 		  ec.c \
 		  gp.c \
-		  bitstream.c \
 		  util.c \
-		  dataencoder.c
 
 
 LIB_NAME = 

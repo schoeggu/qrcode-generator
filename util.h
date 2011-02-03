@@ -7,6 +7,11 @@
 
 typedef unsigned char byte;
 
+typedef unsigned char bool;
+#define true 1
+#define false 0
+
+
 /*
  * reverse bit order of a byte
  */

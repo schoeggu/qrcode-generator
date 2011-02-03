@@ -10,10 +10,10 @@ void encodeAlpha(bitstream* bs, const byte* data, int dataSize);
 byte alphaValue(byte alpha);
 
 
-void encodeData(bitstream* bs, const byte* data, enum EncodeModeIndicator mode, int dataSize)
+void encodeData(bitstream* bs, const byte* data, EncodeModeIndicator mode, int dataSize)
 {
 	void (*encode)(bitstream* bs, const byte* data, int dataSize) = NULL; /* Mode specific encode routine */
-	enum CharacterCountBitsCount ccbc = 0;                          /* Mode specific size of Character Count Information */
+	CharacterCountBitsCount ccbc = 0           ;                          /* Mode specific size of Character Count Information */
 
 	switch(mode) {
 	case ModeByte:
@@ -40,6 +40,20 @@ void encodeData(bitstream* bs, const byte* data, enum EncodeModeIndicator mode, 
 	bs_add_b(bs, 0, 8 - (bs->size % 8)); /* fill up remaining bits */
 }
 
+
+int getBitCount(int numChars, EncodeModeIndicator mode)
+{
+	switch(mode) {
+	case ModeNumeric:
+		return 4 + CountNumeric + 10 * (numChars / 3) + ((numChars % 3 == 0) ? 0 : ((numChars % 3 == 1) ? 4 : 7));
+	case ModeAlpha:
+		return 4 + CountAlpha + 11 * (numChars / 2) + 6 *(numChars % 2);
+	case ModeByte:
+		return 4 + CountByte + 8 * numChars;
+	}
+	return 0;
+}
+
 void encodeByte(bitstream* bs, const byte* data, int dataSize)
 {
 	bs_add_bs(bs, data, dataSize, dataSize*8);
@@ -49,6 +63,7 @@ void encodeNumeric(bitstream* bs, const byte* data, int dataSize)
 {
 	int i;
 	unsigned int block; 
+	int blockSize = 10;
 	byte* tdata = malloc(dataSize);
 	byte* tmp = tdata;
 
@@ -66,14 +81,14 @@ void encodeNumeric(bitstream* bs, const byte* data, int dataSize)
 		block = *tdata * 100 + *(tdata + 1) * 10 + *(tdata + 2);
 		dataSize -= 3;
 		tdata += 3;
-		bs_add_i(bs, block, 10);
+		bs_add_i(bs, block, blockSize);
 	}
 	// add last 2 or 1 remaining digit
 	if (dataSize == 2) {
 		block = *tdata * 10 + *(tdata + 1);
-		bs_add_i(bs, block, 7);
+		bs_add_i(bs, block, blockSize - 3);
 	} else if (dataSize == 1) {
-		bs_add_i(bs, *tdata, 4);
+		bs_add_i(bs, *tdata, blockSize - 6);
 	}
 
 	free(tmp);
@@ -82,16 +97,19 @@ void encodeNumeric(bitstream* bs, const byte* data, int dataSize)
 void encodeAlpha(bitstream* bs, const byte* data, int dataSize)
 {
 	unsigned int block; 
+	int blockSize = 11;
+	// group 2 chars together c1*45+c2
 	while(dataSize >= 2) {
 		block = alphaValue(*data) * 45 + alphaValue(*(data + 1));
 		printf("%d\n", block);
 		dataSize -= 2;
 		data += 2;
-		bs_add_i(bs, block, 11);
+		bs_add_i(bs, block, blockSize);
 	}
+	// add last char if there is one
 	if (dataSize) {
 		block = alphaValue(*data);
-		bs_add_i(bs, block, 6);
+		bs_add_i(bs, block, blockSize - 5);
 		printf("%d\n", block);
 	}
 }

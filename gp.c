@@ -5,7 +5,7 @@
 #include <string.h>
 
 byte** gp = 0;
-static int gp_initialized = 0;
+static bool gp_initialized = false;
 
 void initialize_gp()
 {
@@ -38,7 +38,7 @@ void initialize_gp()
 	}
 
 	fclose(file);
-	gp_initialized = 1;	
+	gp_initialized = true;	
 }	
 
 void destroy_gp()
@@ -52,7 +52,7 @@ void destroy_gp()
 		free(gp);
 		gp = NULL;
 	}
-	gp_initialized = 0;	
+	gp_initialized = false;	
 }
 
 const byte* get_gp(unsigned int numBlocks)
