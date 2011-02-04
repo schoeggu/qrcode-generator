@@ -1,7 +1,23 @@
 #ifndef SYMBOLINFO_H
 #define SYMBOLINFO_H
 
-#include "dataencoder.h"
+//#include "dataencoder.h"
+#include "util.h"
+
+typedef enum {
+	EC_NONE = 0,
+	EC_L,
+	EC_M,
+	EC_Q,
+	EC_H
+} ECLevel;
+
+typedef enum {
+	ModeNumeric = 1, // 0001
+	ModeAlpha =   2, // 0010
+	ModeByte =    4  // 0100
+} EncodeModeIndicator;
+
 
 typedef struct {
 	int version;					/* Symbol version 1-40, 0 for auto */
@@ -22,8 +38,19 @@ typedef struct {
 	
 } SymbolInfo;
 
+typedef struct {
+	int totalCodeWords;	
+	int ecCodeWords[4];
+	int dataCodeWords[4];
+	int blocks[4];
+} codeWords;
+
+
 bool si_init(SymbolInfo* si, const byte* data, int dataCound, EncodeModeIndicator mode, ECLevel level);
 void si_reset(SymbolInfo* si);
+
+bool si_init_codewords();
+void si_destroy_codewords();
 
 bool si_set_version(SymbolInfo* si, int version);
 bool si_set_data(SymbolInfo* si, const byte* data, int dataCount, EncodeModeIndicator mode);
@@ -31,10 +58,9 @@ bool si_set_eclevel(SymbolInfo* si, ECLevel level);
 
 bool si_check_integrity(SymbolInfo* si);
 
-int get_max_characters(int version, int ecLevel, EncodeModeIndicator mode);
-int get_min_version(int dataCount, int ecLevel, EncodeModeIndicator mode);
+int get_min_version(int dataCount, int ecLevel);
 
-int get_total_codewords(int version, int ecLevel);
+int get_total_codewords(int version);
 int get_ec_codewords(int version, int ecLevel);
 int get_data_codewords(int version, int ecLevel);
 

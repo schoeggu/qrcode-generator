@@ -1,4 +1,5 @@
 #include "dataencoder.h"
+#include "symbolinfo.h"
 #include "util.h"
 
 #include <stdio.h>
@@ -10,12 +11,15 @@ void encodeAlpha(bitstream* bs, const byte* data, int dataSize);
 byte alphaValue(byte alpha);
 
 
-void encodeData(bitstream* bs, const byte* data, EncodeModeIndicator mode, int dataSize)
+void encodeData(bitstream* bs, const SymbolInfo* si)
 {
+	if (!bs || !si) return;
+
+
 	void (*encode)(bitstream* bs, const byte* data, int dataSize) = NULL; /* Mode specific encode routine */
 	CharacterCountBitsCount ccbc = 0           ;                          /* Mode specific size of Character Count Information */
 
-	switch(mode) {
+	switch(si->encodeMode) {
 	case ModeByte:
 		ccbc = CountByte;
 		encode = &encodeByte;
@@ -29,15 +33,29 @@ void encodeData(bitstream* bs, const byte* data, EncodeModeIndicator mode, int d
 		encode = &encodeNumeric;
 	break;
 	default:
-		fprintf(stderr, "Mode not supported: %d", mode);
+		fprintf(stderr, "Mode not supported: %d", si->encodeMode);
 		return;
 	}
 
-	bs_add_b(bs, mode, 4);               /* add Mode information*/
-	bs_add_i(bs, dataSize, ccbc);        /* add Character count information */
-	(*encode)(bs, data, dataSize);       /* add data, mode speicific */
-	bs_add_b(bs, Terminator, 4);         /* add terminator */
-	bs_add_b(bs, 0, 8 - (bs->size % 8)); /* fill up remaining bits */
+	bs_add_b(bs, si->encodeMode, 4);               /* add Mode information*/
+	bs_add_i(bs, si->dataCount, ccbc); 			       /* add Character count information */
+	(*encode)(bs, si->inputData, si->dataCount);   /* add data, mode speicific */
+
+	// terminator, doesn't need to be added if
+	// the data fills out the whole capacaty
+	int bitsLeft = si->totalCodeWords - bs->size;
+	if (bitsLeft > 0) {
+		int terminatorLen = ((bitsLeft > 4) ? 4 : bitsLeft);
+		bs_add_b(bs, Terminator, terminatorLen);         /* add terminator */
+	}
+
+	if (bs->size % 8) bs_add_b(bs, 0, 8 - (bs->size % 8)); /* fill up remaining bits of last byte */
+
+	bool b = false;
+	while(bs->size / 8 < si->dataCodeWords) {
+		bs_add_b(bs, Padding[b], 8);
+		b = !b;
+	}
 }
 
 
@@ -101,7 +119,6 @@ void encodeAlpha(bitstream* bs, const byte* data, int dataSize)
 	// group 2 chars together c1*45+c2
 	while(dataSize >= 2) {
 		block = alphaValue(*data) * 45 + alphaValue(*(data + 1));
-		printf("%d\n", block);
 		dataSize -= 2;
 		data += 2;
 		bs_add_i(bs, block, blockSize);
@@ -110,7 +127,6 @@ void encodeAlpha(bitstream* bs, const byte* data, int dataSize)
 	if (dataSize) {
 		block = alphaValue(*data);
 		bs_add_i(bs, block, blockSize - 5);
-		printf("%d\n", block);
 	}
 }
 

@@ -1,5 +1,5 @@
-#ifndef EC_H
-#define EC_H
+#ifndef EC_H_
+#define EC_H_
 
 /*
  * Error Correction
@@ -31,5 +31,5 @@ byte altope(const int alpha);
  */
 int petoal(const byte integer);
 
-#endif //EC_H
+#endif //EC_H_
 

@@ -52,7 +52,6 @@ void bs_add_bs(bitstream* bs, const byte* data, int dataSize, int numBits)
 void bs_add_i(bitstream* bs, unsigned int data, int numBits) {
 	data = reverse_bit_i(data);/*reverse bit order, otherwise data order is wrong*/
 	data >>= (sizeof(data)*8 - numBits);
-
 	/* add one byte after the other */
 	while (numBits > 8) {
 		bs_add_internal(bs, (byte)data, 8);
@@ -87,7 +86,7 @@ void bs_add_internal(bitstream* bs, byte data, int numBits)
 		numBytes++;
    	}
 	/* then, put the rest to the next byte */
-	if (numBits - trailingbits > 0) {
+	if (numBits - (trailingbits ? 8 - trailingbits : 0) > 0) {
 		bs->buffer[numBytes] |= (byte)((mask & data) >> (trailingbits ? 8 - trailingbits : 0));
 		if (numBits - trailingbits == 8) bs->buffer[numBytes] = reverse_bit_b(bs->buffer[numBytes]);
 	}

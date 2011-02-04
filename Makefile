@@ -3,10 +3,10 @@ BIN_C	= test.c \
 		  symbolinfo.c \
 		  dataencoder.c \
 		  bitstream.c \
+		  util.c \
 		  ec.c \
 		  gp.c \
-		  util.c \
-
+		  symbolinfo.c \
 
 LIB_NAME = 
 LIB_C   = 
@@ -29,7 +29,6 @@ CC = cc
 CFLAGS += -Wall 
 CFLAGS += -ggdb
 #CFLAGS += -fPIC
-CFLAGS += -I/usr/include/c++/4.1.0
 CFLAGS += $(PKGCONFIGCFLAGS)
 
 ifdef O

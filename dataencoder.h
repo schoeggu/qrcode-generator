@@ -3,25 +3,11 @@
 
 #include "util.h"
 #include "bitstream.h"
+#include "symbolinfo.h"
 
-
-typedef enum {
-	EC_NONE = 0,
-	EC_L,
-	EC_M,
-	EC_Q,
-	EC_H
-} ECLevel;
-
-typedef enum {
-	ModeNumeric = 1, // 0001
-	ModeAlpha =   2, // 0010
-	ModeByte =    4  // 0100
-} EncodeModeIndicator;
 
 static const byte Terminator = 0; //     0000
-static const byte Padding1 = 236; // 11101100
-static const byte Padding2 = 17;  // 00010001
+static const byte Padding[] = {236, 17}; // 11101100 and 00010001
 
 
 /*
@@ -38,8 +24,9 @@ typedef enum {
 	CountNumeric // 10
 } CharacterCountBitsCount;
 
+struct SymbolInfo;
 
-void encodeData(bitstream* bs, const byte* data, EncodeModeIndicator mode, int dataSize);
+void encodeData(bitstream* bs, const SymbolInfo* si);
 int getBitCount(int numChars, EncodeModeIndicator mode);
 
 #endif //DATAENCODER_H
