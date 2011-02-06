@@ -61,9 +61,6 @@ bool si_check_integrity(SymbolInfo* si)
 
 	int encodedDataCount = si->encodedDataCount;
 
-	int totalCodeWords;
-	int ecCodeWords;
-	int dataCodeWords;
 	int blocks;
 	
 
