@@ -10,6 +10,7 @@ cairo_surface_t* surface;
 
 static float sourceSize = 1000.0;
 
+inline int getNumPixels(int version) { return 21 + 4 * (version - 1); }
 
 gboolean expose_event_callback(GtkWidget* widget, GdkEventExpose* event, gpointer data)
 {
@@ -38,11 +39,13 @@ gboolean expose_event_callback(GtkWidget* widget, GdkEventExpose* event, gpointe
 
 bool intersectsPattern(int x, int y, int version)
 {
-	int numPixels = 21 + 4*(version-1);
+	int numPixels = getNumPixels(version);
 	
+	//finder pattern and formatinfo
 	if (x < 9 && (y < 9 || y > numPixels - 9)) return true;
 	if (x > numPixels - 9 && y < 9) return true;
 	
+	//alignement pattern
 	int i;
 	const AlignementPatternPosition* ap = getAp(version);
 	
@@ -50,6 +53,15 @@ bool intersectsPattern(int x, int y, int version)
 		int apX = ap->position[i].x;
 		int apY = ap->position[i].y;
 		if (x > apX - 3 && x < apX + 3 && y > apY - 3 && y < apY + 3) return true;
+	}
+
+	//time pattern
+	if (x == 6 || y == 6) return true;
+
+	//version info
+	if (version >= 7) {
+		if (x < 6 && y > numPixels - 12) return true;
+		if (y < 6 && x > numPixels - 12) return true;
 	}
 	
 	return false;
@@ -76,7 +88,7 @@ void drawFinderPattern(cairo_t* cr, int x, int y)
 
 void drawTimingPattern(cairo_t* cr, int version)
 {
-	int numPixels = 21 + 4*(version-1);
+	int numPixels = getNumPixels(version);
 	printf("numPixels %d\n", numPixels);
 	int row;
 	int collumn;
@@ -116,8 +128,8 @@ void drawAlignmentPattern(cairo_t* cr, int x, int y)
 
 void drawRaster(cairo_t* cr, int version)
 {
-	int numPixels = 21 + 4*(version-1);
-	int x, y;
+	int numPixels = getNumPixels(version);
+	int x;
 		
 	cairo_save(cr);
 	
@@ -138,9 +150,49 @@ void drawRaster(cairo_t* cr, int version)
 
 }
 
+void drawFormatInformation(cairo_t* cr, int version)
+{
+	int numPixels = getNumPixels(version);
+
+	cairo_set_source_rgba(cr, 0.8, 0.5, 0.4, 0.3);
+	
+	cairo_rectangle(cr, 0, 8, 6, 1);
+	cairo_fill(cr);
+
+	cairo_rectangle(cr, 7, 8, 2, 1);
+	cairo_fill(cr);
+	cairo_rectangle(cr, 8, 0, 1, 6);
+	cairo_fill(cr);
+	cairo_rectangle(cr, 8, 7, 1, 1);
+	cairo_fill(cr);
+
+	cairo_rectangle(cr, 8, numPixels-7, 1, 7);
+	cairo_fill(cr);
+	cairo_rectangle(cr, numPixels-8, 8, 8, 1);
+	cairo_fill(cr);
+
+	cairo_set_source_rgba(cr, 0, 0, 0, 1);
+	cairo_rectangle(cr, 8, numPixels-8, 1, 1);
+	cairo_fill(cr);
+}
+
+void drawVersionInformation(cairo_t* cr, int version)
+{
+	if (version < 7) return;
+	int numPixels = getNumPixels(version);
+	cairo_set_source_rgba(cr, 0.4, 0.5, 0.8, 0.3);
+
+	cairo_rectangle(cr, 0, numPixels - 11, 6, 3);
+	cairo_fill(cr);
+
+	cairo_rectangle(cr, numPixels - 11, 0, 3, 6);
+	cairo_fill(cr);
+}
+
+
 void drawPatternPath(cairo_t* cr, int version)
 {
-	int numPixels = 21 + 4*(version-1);
+	int numPixels = getNumPixels(version);
 	int x, y;
 	point lastpoint;
 	
@@ -153,36 +205,61 @@ void drawPatternPath(cairo_t* cr, int version)
 	
 	printf("hello\n");
 	for (x = numPixels-1; x >= 0; x-=2) {
-		if (x == 6) x-=2;
 		for (y = numPixels-1; y >= 0; y--) {
 			if (!intersectsPattern(x, y, version)) {
+				cairo_set_source_rgba(cr, 0.3, 0.3, 0.3, 0.5);
+				cairo_rectangle(cr, x, y, 1, 1);
+				cairo_fill(cr);
+				cairo_set_source_rgba(cr, 0, 0.8, 0.8, 0.5);
+
+
 				cairo_move_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
 				lastpoint.x=x;
 				lastpoint.y=y;
 				cairo_line_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
+				cairo_stroke(cr);
 			}
 			
 			if (!intersectsPattern(x-1, y, version)) {
+				cairo_set_source_rgba(cr, 0.3, 0.3, 0.3, 0.5);
+				cairo_rectangle(cr, x-1, y, 1, 1);
+				cairo_fill(cr);
+				cairo_set_source_rgba(cr, 0, 0.8, 0.8, 0.5);
+
 				cairo_move_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
 				lastpoint.x=x-1;
 				lastpoint.y=y;
 				cairo_line_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
+				cairo_stroke(cr);
 			}		
 		}
 		x-=2;
+		if (x == 6) { printf("x is 6\n"); x-=1;}
 		for (y = 0; y <= numPixels-1; y++) {
 			if (!intersectsPattern(x, y, version)) {
+				cairo_set_source_rgba(cr, 0.3, 0.3, 0.3, 0.5);
+				cairo_rectangle(cr, x, y, 1, 1);
+				cairo_fill(cr);
+				cairo_set_source_rgba(cr, 0, 0.8, 0.8, 0.5);
+
 				cairo_move_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
 				lastpoint.x=x;
 				lastpoint.y=y;
 				cairo_line_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
+				cairo_stroke(cr);
 			}
 			
 			if (!intersectsPattern(x-1, y, version)) {
+				cairo_set_source_rgba(cr, 0.3, 0.3, 0.3, 0.5);
+				cairo_rectangle(cr, x-1, y, 1, 1);
+				cairo_fill(cr);
+				cairo_set_source_rgba(cr, 0, 0.8, 0.8, 0.5);
+
 				cairo_move_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
 				lastpoint.x=x-1;
 				lastpoint.y=y;
 				cairo_line_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
+				cairo_stroke(cr);
 			}
 		}
 	}
@@ -194,8 +271,7 @@ void drawPatternPath(cairo_t* cr, int version)
 
 void initSurface(cairo_surface_t* surface, int version)
 {
-	printf("1\n");
-	int numPixels = 21 + 4*(version-1);
+	int numPixels = getNumPixels(version);
 
 	cairo_t* cr;
 	cr = cairo_create(surface);	
@@ -226,6 +302,9 @@ void initSurface(cairo_surface_t* surface, int version)
 	
 	drawPatternPath(cr, version);
 
+	drawFormatInformation(cr, version);
+	drawVersionInformation(cr, version);
+
 
 	cairo_destroy(cr);
 }
@@ -248,6 +327,7 @@ int main(int argc, char** argv)
 	cairo_rectangle_t rect = {0, 0, sourceSize, sourceSize};
 
 	surface = cairo_recording_surface_create(CAIRO_CONTENT_COLOR_ALPHA, &rect);
+//	surface = cairo_svg_surface_create("nil", sourceSize, sourceSize);
 	initSurface(surface, version);
 
 	destroy_ap();
