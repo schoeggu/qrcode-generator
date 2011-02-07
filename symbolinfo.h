@@ -26,7 +26,7 @@ typedef struct {
 
 typedef struct {
 	int numberOfBlocks;             /* Number of Data Blocks in Symbol */
-	const Block* block;             /* Array of Blocks */
+	Block* block;                   /* Array of Blocks */
 } BlockInfo;
 
 typedef struct {
@@ -44,7 +44,7 @@ typedef struct {
 	int ecCodeWords;				/* Number of Error Correction Code Words in Symbol */
 	int dataCodeWords;				/* Number of data Code Words in Symbol */
 
-	BlockInfo blockInfo;			/* Datablocks of Symbol */
+	BlockInfo blockInfo;	     	/* Datablocks of Symbol */
 
 	int formatInfo;  				/* Encoded  Format Info. 15bit */
 	int versionInfo;				/* Encoded Version Info. 18bit */
@@ -76,5 +76,7 @@ int get_min_version(int dataCount, int ecLevel);
 int get_total_codewords(int version);
 int get_ec_codewords(int version, int ecLevel);
 int get_data_codewords(int version, int ecLevel);
+
+BlockInfo get_block_info(int version, int ecLevel);
 
 #endif //SYMBOLINFO_H

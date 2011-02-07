@@ -103,7 +103,15 @@ bool qrgen_generate_force_version(const byte* data, int dataSize, int version, E
 	printf("datacw       %d\n", si.dataCodeWords);
 	printf("eccw         %d\n", si.ecCodeWords);
 	printf("formatinfo   %d\n", si.formatInfo);
-	printf("versioninfo  %d\n", si.versionInfo);
+	int blocknum = si.blockInfo.numberOfBlocks;
+	printf("numblocks    %d\n", blocknum);
+	int q;
+	for (q = 0; q < blocknum; q++) {
+		printf("  block[%d].total   %d\n", q, si.blockInfo.block[q].totalCodeWords);
+		printf("  block[%d].ecCW    %d\n", q, si.blockInfo.block[q].ecCodeWords);
+		printf("  block[%d].dataCW  %d\n\n", q, si.blockInfo.block[q].dataCodeWords);
+	}
+
 	/***
 	 * *  TMP
 	 * */

@@ -70,9 +70,6 @@ bool si_check_integrity(SymbolInfo* si)
 
 	int encodedDataCount = si->encodedDataCount;
 
-	int blocks;
-	
-
 	// if we need, choose the minimum version
 	if(autoVersion && ecLevel  < 4 && encodedDataCount) {
 		si->version = get_min_version(encodedDataCount, ecLevel);
@@ -98,9 +95,9 @@ bool si_check_integrity(SymbolInfo* si)
 	}
 
 
-	//TODO blocks if version and eclevel
-
-
+	if (version && ecLevel < 4) {
+		si->blockInfo = get_block_info(version, ecLevel);
+	}
 
 	return true;
 }
@@ -143,6 +140,18 @@ int get_total_codewords(int version)
 	return 0;
 }
 
+BlockInfo get_block_info(int version, int ecLevel)
+{
+	if (version > 0 && version < 41) {
+		return cw[version-1].blocks[ecLevel];
+	}	
+	BlockInfo b;
+	b.numberOfBlocks = 0;
+	b.block = NULL;
+	return b;
+	
+}
+
 
 
 void si_reset(SymbolInfo* si)
@@ -173,7 +182,6 @@ bool si_init_codewords()
 	
 	cw = calloc(40, sizeof(codeWords));
 
-	int index = 0;
 	char buffer[256];
 	char delim[] = " ";
 	char* number;
@@ -183,24 +191,64 @@ bool si_init_codewords()
 		int version = atoi(number);
 		if (version < 0 || version > 40) return false;
 
-
 		number = strtok(NULL, delim);
-
 		int totalCW = atoi(number);
 		cw[version-1].totalCodeWords = totalCW;
+
+		int i;
 		ECLevel l[] = { EC_L, EC_M, EC_Q, EC_H };
-		for(index = 0; index < 4; index++) {
-			number = strtok(NULL, delim);
+		for (i = 0; i < 4; i++) {
+			if(!fgets(buffer, 256, file)) return false;
+			ECLevel ecLevel = l[i];
+
+			number = strtok(buffer, delim);
+
 			int ecCW = atoi(number);
-			cw[version-1].ecCodeWords[l[index]] = ecCW;
-			cw[version-1].dataCodeWords[l[index]] = totalCW - ecCW;
+
+			cw[version-1].ecCodeWords[ecLevel] = ecCW;
+			cw[version-1].dataCodeWords[ecLevel] = totalCW - ecCW;
+
+			int numFirstBlock = 0;
+			int numSecondBlock = 0;
+			int totalFirstBlock = 0;
+			int totalSecondBlock = 0;
+			int dataFirstBlock = 0;
+			int dataSecondBlock = 0;
 
 			number = strtok(NULL, delim);
-			int blocks = atoi(number);
-//			cw[version-1].blocks[l[index]] = blocks;
-		
-		}
+			numFirstBlock = atoi(number);
 
+			number = strtok(NULL, delim);
+			totalFirstBlock = atoi(number);
+
+			number = strtok(NULL, delim);
+			dataFirstBlock = atoi(number);
+
+			number = strtok(NULL, delim);
+			if (number) {
+				numSecondBlock = atoi(number);
+
+				number = strtok(NULL, delim);
+				totalSecondBlock = atoi(number);
+	
+				number = strtok(NULL, delim);
+				dataSecondBlock = atoi(number);
+			}
+
+			cw[version-1].blocks[ecLevel].numberOfBlocks = numFirstBlock + numSecondBlock;
+			cw[version-1].blocks[ecLevel].block = calloc(numFirstBlock + numSecondBlock, sizeof(Block));
+			int j;
+			for (j = 0; j < numFirstBlock; j++) {
+				cw[version-1].blocks[ecLevel].block[j].totalCodeWords = totalFirstBlock;
+				cw[version-1].blocks[ecLevel].block[j].dataCodeWords = dataFirstBlock;
+				cw[version-1].blocks[ecLevel].block[j].ecCodeWords = totalFirstBlock - dataFirstBlock;
+			}
+			for (; j < numFirstBlock + numSecondBlock; j++) {
+				cw[version-1].blocks[ecLevel].block[j].totalCodeWords = totalSecondBlock;
+				cw[version-1].blocks[ecLevel].block[j].dataCodeWords = dataSecondBlock;
+				cw[version-1].blocks[ecLevel].block[j].ecCodeWords = totalSecondBlock - dataSecondBlock;
+			}
+		}
 	}
 
 	fclose(file);
