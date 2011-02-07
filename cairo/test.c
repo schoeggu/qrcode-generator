@@ -36,6 +36,26 @@ gboolean expose_event_callback(GtkWidget* widget, GdkEventExpose* event, gpointe
 	return TRUE;
 }
 
+bool intersectsPattern(int x, int y, int version)
+{
+	int numPixels = 21 + 4*(version-1);
+	
+	if (x < 9 && (y < 9 || y > numPixels - 9)) return true;
+	if (x > numPixels - 9 && y < 9) return true;
+	
+	int i;
+	const AlignementPatternPosition* ap = getAp(version);
+	
+	for (i = 0; i < ap->numberOfPatterns; i++) {
+		int apX = ap->position[i].x;
+		int apY = ap->position[i].y;
+		if (x > apX - 3 && x < apX + 3 && y > apY - 3 && y < apY + 3) return true;
+	}
+	
+	return false;
+
+}
+
 void drawFinderPattern(cairo_t* cr, int x, int y)
 {
 	cairo_save(cr);
@@ -94,11 +114,87 @@ void drawAlignmentPattern(cairo_t* cr, int x, int y)
 	cairo_restore(cr);
 }
 
+void drawRaster(cairo_t* cr, int version)
+{
+	int numPixels = 21 + 4*(version-1);
+	int x, y;
+		
+	cairo_save(cr);
+	
+	cairo_set_line_width(cr, 0.1);
+	
+	cairo_set_source_rgb(cr, 0.8, 0.8, 0.8);
+	
+	for (x = 0; x < numPixels; x++) {
+		cairo_move_to(cr, x, 0);
+		cairo_line_to(cr, x, numPixels);
+		cairo_move_to(cr, 0, x);
+		cairo_line_to(cr, numPixels, x);
+	}
+	
+	cairo_stroke(cr);
+	
+	cairo_restore(cr);
+
+}
+
+void drawPatternPath(cairo_t* cr, int version)
+{
+	int numPixels = 21 + 4*(version-1);
+	int x, y;
+	point lastpoint;
+	
+	cairo_save(cr);
+	cairo_set_line_width(cr, 0.1);
+	cairo_set_source_rgba(cr, 0, 0.8, 0.8, 0.5);
+	cairo_move_to(cr, numPixels-1+0.5, numPixels-1+0.5);
+	lastpoint.x = numPixels-1;
+	lastpoint.y = numPixels-1;
+	
+	printf("hello\n");
+	for (x = numPixels-1; x >= 0; x-=2) {
+		if (x == 6) x-=2;
+		for (y = numPixels-1; y >= 0; y--) {
+			if (!intersectsPattern(x, y, version)) {
+				cairo_move_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
+				lastpoint.x=x;
+				lastpoint.y=y;
+				cairo_line_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
+			}
+			
+			if (!intersectsPattern(x-1, y, version)) {
+				cairo_move_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
+				lastpoint.x=x-1;
+				lastpoint.y=y;
+				cairo_line_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
+			}		
+		}
+		x-=2;
+		for (y = 0; y <= numPixels-1; y++) {
+			if (!intersectsPattern(x, y, version)) {
+				cairo_move_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
+				lastpoint.x=x;
+				lastpoint.y=y;
+				cairo_line_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
+			}
+			
+			if (!intersectsPattern(x-1, y, version)) {
+				cairo_move_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
+				lastpoint.x=x-1;
+				lastpoint.y=y;
+				cairo_line_to(cr, lastpoint.x+0.5, lastpoint.y+0.5);
+			}
+		}
+	}
+	cairo_stroke(cr);
+	
+	cairo_restore(cr);
+}
 
 
 void initSurface(cairo_surface_t* surface, int version)
 {
-
+	printf("1\n");
 	int numPixels = 21 + 4*(version-1);
 
 	cairo_t* cr;
@@ -110,6 +206,7 @@ void initSurface(cairo_surface_t* surface, int version)
 
 	cairo_rectangle(cr, 0, 0, numPixels, numPixels);
 	cairo_fill(cr);
+	drawRaster(cr, version);
 
 	drawFinderPattern(cr, 0, 0);
 	drawFinderPattern(cr, numPixels-7, 0);
@@ -117,7 +214,7 @@ void initSurface(cairo_surface_t* surface, int version)
 
 	drawTimingPattern(cr, version);
 
-	AlignementPatternPosition* ap = getAp(version);
+	const AlignementPatternPosition* ap = getAp(version);
 
 	int i;
 	printf ("numPattern[%d]\n", ap->numberOfPatterns);
@@ -126,10 +223,13 @@ void initSurface(cairo_surface_t* surface, int version)
 		printf ("Pattern[%d, %d]\n", ap->position[i].x, ap->position[i].y);
 		drawAlignmentPattern(cr, ap->position[i].x, ap->position[i].y);
 	}
+	
+	drawPatternPath(cr, version);
 
 
 	cairo_destroy(cr);
 }
+
 
 
 int main(int argc, char** argv)
@@ -142,7 +242,7 @@ int main(int argc, char** argv)
 
 	oldWidth = 0;
 	oldHeight = 0;
-	
+
 	initialize_ap();
 
 	cairo_rectangle_t rect = {0, 0, sourceSize, sourceSize};
@@ -165,9 +265,9 @@ int main(int argc, char** argv)
 	
 //	gtk_widget_set_size_request(drawArea, 100, 100);
 
-//	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+//	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_MOUSE);
 
-	gtk_window_set_default_size(GTK_WINDOW(window), 320, 320);
+	gtk_window_set_default_size(GTK_WINDOW(window), 220, 220);
 
 	
 	gtk_widget_set_app_paintable(window, TRUE);
