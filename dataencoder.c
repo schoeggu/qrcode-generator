@@ -4,20 +4,20 @@
 
 #include <stdio.h>
 
-void encodeByte(bitstream* bs, const byte* data, int dataSize);
-void encodeNumeric(bitstream* bs, const byte* data, int dataSize);
-void encodeAlpha(bitstream* bs, const byte* data, int dataSize);
+bool encodeByte(bitstream* bs, const byte* data, int dataSize);
+bool encodeNumeric(bitstream* bs, const byte* data, int dataSize);
+bool encodeAlpha(bitstream* bs, const byte* data, int dataSize);
 
 byte alphaValue(byte alpha);
 
 
-void encodeData(bitstream* bs, const SymbolInfo* si)
+bool encodeData(bitstream* bs, const SymbolInfo* si)
 {
-	if (!bs || !si) return;
+	if (!bs || !si) return false;
 
 
-	void (*encode)(bitstream* bs, const byte* data, int dataSize) = NULL; /* Mode specific encode routine */
-	CharacterCountBitsCount ccbc = 0           ;                          /* Mode specific size of Character Count Information */
+	bool (*encode)(bitstream* bs, const byte* data, int dataSize) = NULL; /* Mode specific encode routine */
+	CharacterCountBitsCount ccbc = 0;                                     /* Mode specific size of Character Count Information */
 
 	switch(si->encodeMode) {
 	case ModeByte:
@@ -33,13 +33,14 @@ void encodeData(bitstream* bs, const SymbolInfo* si)
 		encode = &encodeNumeric;
 	break;
 	default:
-		fprintf(stderr, "Mode not supported: %d", si->encodeMode);
-		return;
+		fprintf(stderr, "Error: Mode not supported: %d", si->encodeMode);
+		return false;
 	}
 
 	bs_add_b(bs, si->encodeMode, 4);               /* add Mode information*/
 	bs_add_i(bs, si->dataCount, ccbc); 			       /* add Character count information */
-	(*encode)(bs, si->inputData, si->dataCount);   /* add data, mode speicific */
+	bool ret = (*encode)(bs, si->inputData, si->dataCount);   /* add data, mode speicific */
+	if (!ret) return false;
 
 	// terminator, doesn't need to be added if
 	// the data fills out the whole capacaty
@@ -56,6 +57,8 @@ void encodeData(bitstream* bs, const SymbolInfo* si)
 		bs_add_b(bs, Padding[b], 8);
 		b = !b;
 	}
+
+	return true;
 }
 
 
@@ -72,12 +75,13 @@ int getBitCount(int numChars, EncodeModeIndicator mode)
 	return 0;
 }
 
-void encodeByte(bitstream* bs, const byte* data, int dataSize)
+bool encodeByte(bitstream* bs, const byte* data, int dataSize)
 {
 	bs_add_bs(bs, data, dataSize, dataSize*8);
+	return true;
 }
 
-void encodeNumeric(bitstream* bs, const byte* data, int dataSize)
+bool encodeNumeric(bitstream* bs, const byte* data, int dataSize)
 {
 	int i;
 	unsigned int block; 
@@ -88,8 +92,8 @@ void encodeNumeric(bitstream* bs, const byte* data, int dataSize)
 	//change from alpha to int
 	for (i = 0; i < dataSize; i++) {
 		if (data[i]< '0' || data[i] > '9') {
-			fprintf(stderr, "Not a number: %c", data[i]);
-			return; 
+			fprintf(stderr, "Error: Not a number: %c", data[i]);
+			return false; 
 		}
 		tdata[i] = data[i] - '0';
 	}
@@ -110,15 +114,20 @@ void encodeNumeric(bitstream* bs, const byte* data, int dataSize)
 	}
 
 	free(tmp);
+
+	return true;
 }
 
-void encodeAlpha(bitstream* bs, const byte* data, int dataSize)
+bool encodeAlpha(bitstream* bs, const byte* data, int dataSize)
 {
 	unsigned int block; 
 	int blockSize = 11;
 	// group 2 chars together c1*45+c2
 	while(dataSize >= 2) {
-		block = alphaValue(*data) * 45 + alphaValue(*(data + 1));
+		byte a1 = alphaValue(*data);
+		byte a2 = alphaValue(*(data + 1));
+		if (a1 == (byte)-1 || a2 == (byte)-1) return false;
+		block = a1 * 45 + a2;
 		dataSize -= 2;
 		data += 2;
 		bs_add_i(bs, block, blockSize);
@@ -126,8 +135,11 @@ void encodeAlpha(bitstream* bs, const byte* data, int dataSize)
 	// add last char if there is one
 	if (dataSize) {
 		block = alphaValue(*data);
+		if (block == -1) return false;
 		bs_add_i(bs, block, blockSize - 5);
 	}
+
+	return true;
 }
 
 byte alphaValue(byte alpha)
@@ -156,7 +168,7 @@ byte alphaValue(byte alpha)
 	for (i = 0; i < 9; i++) {
 		if (others[i] == alpha) return ret+i;
 	}
-	fprintf(stderr, "Character not usable in alpha mode: %c", alpha);
+	fprintf(stderr, "Error: Character not usable in alpha mode: %c", alpha);
 
 	return -1;
 

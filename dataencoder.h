@@ -26,7 +26,7 @@ typedef enum {
 
 struct SymbolInfo;
 
-void encodeData(bitstream* bs, const SymbolInfo* si);
+bool encodeData(bitstream* bs, const SymbolInfo* si);
 int getBitCount(int numChars, EncodeModeIndicator mode);
 
 #endif //DATAENCODER_H

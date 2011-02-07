@@ -9,6 +9,9 @@
 
 #include "util.h"
 
+/* QR Code uses pp=285 for the galois field calculation */
+static const int PP = 285;
+
 /*
  *	generate <ecBlocks> Error Correction Blocks from <data> and save it in <dest>
  */

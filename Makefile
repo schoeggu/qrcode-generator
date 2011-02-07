@@ -7,12 +7,15 @@ BIN_C	= test.c \
 		  ec.c \
 		  gp.c \
 		  symbolinfo.c \
+		  qrgen.c \
 
 LIB_NAME = 
 LIB_C   = 
 
 DEPENDFILE = .depend
 
+#PKGCONFIGCFLAGS = $(shell pkg-config --cflags cairo)
+#PKGCONFIGLIBS = $(shell pkg-config --libs cairo)
 
 LIB_SRC = $(LIB_C) $(LIB_CPP)
 LIB_OBJ = $(LIB_CPP:%.cpp=%.o)
@@ -30,6 +33,8 @@ CFLAGS += -Wall
 CFLAGS += -ggdb
 #CFLAGS += -fPIC
 CFLAGS += $(PKGCONFIGCFLAGS)
+
+LDFLAGS += $(PKGCONFIGLIBS)
 
 ifdef O
 CFLAGS += -O$O

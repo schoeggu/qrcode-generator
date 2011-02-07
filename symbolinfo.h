@@ -39,10 +39,21 @@ typedef struct {
 } SymbolInfo;
 
 typedef struct {
+	int totalCodeWords;             /* total number of CodeWords in Block */
+	int ecCodeWords;                /* Number of Error Correction Code Words in Block */
+	int dataCodeWords;              /* Number of data Code Words in Block */
+} Block;
+
+typedef struct {
+	int numberOfBlocks;             /* Number of Data Blocks in Symbol */
+	Block* block;                   /* Array of Blocks */
+} BlockInfo;
+
+typedef struct {
 	int totalCodeWords;	
 	int ecCodeWords[4];
 	int dataCodeWords[4];
-	int blocks[4];
+	BlockInfo blocks[4];
 } codeWords;
 
 
@@ -63,6 +74,5 @@ int get_min_version(int dataCount, int ecLevel);
 int get_total_codewords(int version);
 int get_ec_codewords(int version, int ecLevel);
 int get_data_codewords(int version, int ecLevel);
-
 
 #endif //SYMBOLINFO_H

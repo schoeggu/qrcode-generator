@@ -30,7 +30,10 @@ bool si_set_data(SymbolInfo* si, const byte* data, int dataCount, EncodeModeIndi
 {
 	int tmp;
 
-	if (!data) return false;
+	if (!data) {
+		fprintf(stderr, "Error: no Input data\n");			
+		return false;
+	}
 
 	si->inputData = data;
 	si->dataCount = dataCount;
@@ -44,7 +47,10 @@ bool si_set_data(SymbolInfo* si, const byte* data, int dataCount, EncodeModeIndi
 
 bool si_set_eclevel(SymbolInfo* si, ECLevel level)
 {
-	if (!si || level < 1 || level > 4) return false;	
+	if (!si || level < 1 || level > 4) {
+		fprintf(stderr, "Error: invalid EC_Level\n");
+		return false;	
+	}
 	si->ecLevel = level;
 
 	return si_check_integrity(si);
@@ -52,7 +58,10 @@ bool si_set_eclevel(SymbolInfo* si, ECLevel level)
 
 bool si_check_integrity(SymbolInfo* si)
 {
-	if (!si) return false;
+	if (!si) {
+		fprintf(stderr, "Error: SymbolInfo is NULL\n");
+		return false;	
+	}
 
 	int version = si->version;
 	bool autoVersion = si->autoVersion;
@@ -67,10 +76,17 @@ bool si_check_integrity(SymbolInfo* si)
 	// if we need, choose the minimum version
 	if(autoVersion && ecLevel && encodedDataCount) {
 		si->version = get_min_version(encodedDataCount, ecLevel);
-		if (!version) return false;
+		version = si->version;
+		if (!si->version) {
+			fprintf(stderr, "Error: Cannot choose version, lower, EC_Level or DataSize\n");
+			return false;
+		}
 	// otherwise check if the data fits in chosen version
 	} else if (version && ecLevel && encodedDataCount) {
-		if (encodedDataCount > get_data_codewords(version, ecLevel)) return false;
+		if (encodedDataCount > get_data_codewords(version, ecLevel)) {
+			fprintf(stderr, "Error: Specified Version is too small\n");
+			return false;
+		}
 	}
 
 	if (version) {
@@ -95,7 +111,6 @@ int get_min_version(int dataCount, int ecLevel)
 	if (dataCount < 1 || ecLevel < 1 || ecLevel > 4) return 0;
 	if (!cw_initialized) si_init_codewords();
 	for (i = 0; i < 40; i++) {
-		printf("v[%d], cw[%d], encdat[%d]\n", i+1, get_data_codewords(i+1, ecLevel), dataCount);
 		if (get_data_codewords(i+1, ecLevel) >= dataCount) return i+1;
 	}
 	return 0;
@@ -181,7 +196,7 @@ bool si_init_codewords()
 
 			number = strtok(NULL, delim);
 			int blocks = atoi(number);
-			cw[version-1].blocks[index] = blocks;
+//			cw[version-1].blocks[index] = blocks;
 		
 		}
 

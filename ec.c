@@ -5,21 +5,28 @@
 
 #include <string.h> 
 #include <stdlib.h> 
+#include <stdio.h> 
 
 static bool initialized = false;
 static byte galois[256];
 
-/* QR Code uses pp=285 for the galois field calculation */
-static const int PP = 285;
+///* QR Code uses pp=285 for the galois field calculation */
+//static const int PP = 285;
 
 
 bool generateErrorCorrectionCode(const byte* const data, int dataSize, byte* dest, int ecBlocks)
 {
-	if (!data || !dest) return 0;
+	if (!data || !dest) {
+		fprintf(stderr, "Error: Cannot calculate Error correction, inputData or Dest is NULL\n");	
+		return 0;
+	}
 
 	/* first get de Generator Polinomial */
 	const byte* gp = get_gp(ecBlocks);
-	if (!gp) return false;
+	if (!gp) {
+		fprintf(stderr, "Error: Cannot calculate Error correction, coudn't retreive Generator Polynomial\n");	
+		return false;
+	}
 
 	int totalSize = dataSize + ecBlocks;
 	int i;

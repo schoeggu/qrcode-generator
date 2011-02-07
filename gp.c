@@ -33,7 +33,7 @@ void initialize_gp()
 
 		}
 
-		if (rNum != num - 1) printf("Error in gp.rc: %d has %d items\n", rNum, num);
+		if (rNum != num - 1) fprintf(stderr, "Error: in gp.rc: %d has %d items\n", rNum, num);
 
 	}
 
