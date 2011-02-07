@@ -47,7 +47,7 @@ bool si_set_data(SymbolInfo* si, const byte* data, int dataCount, EncodeModeIndi
 
 bool si_set_eclevel(SymbolInfo* si, ECLevel level)
 {
-	if (!si || level < 1 || level > 4) {
+	if (!si || level < 0 || level > 3) {
 		fprintf(stderr, "Error: invalid EC_Level\n");
 		return false;	
 	}
@@ -74,7 +74,7 @@ bool si_check_integrity(SymbolInfo* si)
 	
 
 	// if we need, choose the minimum version
-	if(autoVersion && ecLevel && encodedDataCount) {
+	if(autoVersion && ecLevel  < 4 && encodedDataCount) {
 		si->version = get_min_version(encodedDataCount, ecLevel);
 		version = si->version;
 		if (!si->version) {
@@ -82,7 +82,7 @@ bool si_check_integrity(SymbolInfo* si)
 			return false;
 		}
 	// otherwise check if the data fits in chosen version
-	} else if (version && ecLevel && encodedDataCount) {
+	} else if (version && ecLevel < 4 && encodedDataCount) {
 		if (encodedDataCount > get_data_codewords(version, ecLevel)) {
 			fprintf(stderr, "Error: Specified Version is too small\n");
 			return false;
@@ -91,7 +91,7 @@ bool si_check_integrity(SymbolInfo* si)
 
 	if (version) {
 		si->totalCodeWords = get_total_codewords(version);
-		if (ecLevel) {
+		if (ecLevel < 4) {
 			si->dataCodeWords = get_data_codewords(version, ecLevel);
 			si->ecCodeWords = get_ec_codewords(version, ecLevel);
 		}
@@ -108,7 +108,7 @@ bool si_check_integrity(SymbolInfo* si)
 int get_min_version(int dataCount, int ecLevel) 
 {
 	int i;
-	if (dataCount < 1 || ecLevel < 1 || ecLevel > 4) return 0;
+	if (dataCount < 1 || ecLevel < 0 || ecLevel > 3) return 0;
 	if (!cw_initialized) si_init_codewords();
 	for (i = 0; i < 40; i++) {
 		if (get_data_codewords(i+1, ecLevel) >= dataCount) return i+1;
@@ -118,18 +118,18 @@ int get_min_version(int dataCount, int ecLevel)
 
 int get_data_codewords(int version, int ecLevel)
 {
-	if (version > 0 && version < 41 && ecLevel > 0 && ecLevel < 5) {
+	if (version > 0 && version < 41 && ecLevel >= 0 && ecLevel < 4) {
 		if (!cw_initialized) si_init_codewords();
-		return cw[version - 1].dataCodeWords[ecLevel - 1];
+		return cw[version - 1].dataCodeWords[ecLevel];
 	}
 	return 0;
 }
 
 int get_ec_codewords(int version, int ecLevel)
 {
-	if (version > 0 && version < 41 && ecLevel > 0 && ecLevel < 5) {
+	if (version > 0 && version < 41 && ecLevel >= 0 && ecLevel < 4) {
 		if (!cw_initialized) si_init_codewords();
-		return cw[version - 1].ecCodeWords[ecLevel - 1];
+		return cw[version - 1].ecCodeWords[ecLevel];
 	}
 	return 0;
 }
@@ -147,17 +147,18 @@ int get_total_codewords(int version)
 
 void si_reset(SymbolInfo* si)
 {
-	si->version          = 0;
-	si->autoVersion      = true;
-	si->ecLevel          = EC_NONE;
-	si->encodeMode       = 0;
-	si->inputData        = NULL;
-	si->dataCount        = 0;
-	si->encodedDataCount = 0;
-	si->totalCodeWords   = 0;
-	si->ecCodeWords      = 0;
-	si->dataCodeWords    = 0;
-	si->blocks           = 0;
+	si->version                  = 0;
+	si->autoVersion              = true;
+	si->ecLevel                  = EC_NONE;
+	si->encodeMode               = 0;
+	si->inputData                = NULL;
+	si->dataCount                = 0;
+	si->encodedDataCount         = 0;
+	si->totalCodeWords           = 0;
+	si->ecCodeWords              = 0;
+	si->dataCodeWords            = 0;
+	si->blockInfo.numberOfBlocks = 0;
+	si->blockInfo.block          = NULL;
 }
 
 
@@ -169,7 +170,6 @@ bool si_init_codewords()
 	if (!file) {
 		exit(1);
 	}
-
 	
 	cw = calloc(40, sizeof(codeWords));
 
@@ -188,15 +188,16 @@ bool si_init_codewords()
 
 		int totalCW = atoi(number);
 		cw[version-1].totalCodeWords = totalCW;
+		ECLevel l[] = { EC_L, EC_M, EC_Q, EC_H };
 		for(index = 0; index < 4; index++) {
 			number = strtok(NULL, delim);
 			int ecCW = atoi(number);
-			cw[version-1].ecCodeWords[index] = ecCW;
-			cw[version-1].dataCodeWords[index] = totalCW - ecCW;
+			cw[version-1].ecCodeWords[l[index]] = ecCW;
+			cw[version-1].dataCodeWords[l[index]] = totalCW - ecCW;
 
 			number = strtok(NULL, delim);
 			int blocks = atoi(number);
-//			cw[version-1].blocks[index] = blocks;
+//			cw[version-1].blocks[l[index]] = blocks;
 		
 		}
 

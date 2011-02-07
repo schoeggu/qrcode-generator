@@ -18,6 +18,12 @@ static const int PP = 285;
 bool generateErrorCorrectionCode(const byte* const data, int dataSize, byte* dest, int ecBlocks);
 
 /*
+ * BCH (Bose-Chaudhuri-Hocquenghem-Code) used to encode Format and Version information
+ *
+ */
+int bch(int totalBits, int DataBits, int data, int gpb);
+
+/*
  * A galois field is needed 
  */
 void calculate_galois_field(const int pp);

@@ -10,10 +10,6 @@
 static bool initialized = false;
 static byte galois[256];
 
-///* QR Code uses pp=285 for the galois field calculation */
-//static const int PP = 285;
-
-
 bool generateErrorCorrectionCode(const byte* const data, int dataSize, byte* dest, int ecBlocks)
 {
 	if (!data || !dest) {
@@ -55,6 +51,24 @@ bool generateErrorCorrectionCode(const byte* const data, int dataSize, byte* des
 
 	return true;
 }
+
+int bch(int totalBits, int dataBits, int data, int gpb) {
+	int ecBits = totalBits - dataBits;
+	int top = 1<<(totalBits-1);
+
+	data <<= ecBits;
+	gpb <<=(dataBits-1);
+
+	while (top > 1<<(ecBits-1)) {
+		if ((top & data)) {
+			data ^= gpb;
+		}
+		top >>= 1;
+		gpb >>= 1;
+	}
+	return data;
+}
+
 
 
 void calculate_galois_field(const int pp) 

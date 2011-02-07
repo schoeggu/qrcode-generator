@@ -5,11 +5,11 @@
 #include "util.h"
 
 typedef enum {
-	EC_NONE = 0,
-	EC_L,
-	EC_M,
-	EC_Q,
-	EC_H
+	EC_NONE = 4,
+	EC_L = 1, // 01
+	EC_M = 0, // 00
+	EC_Q = 3, // 11
+	EC_H = 2  // 10
 } ECLevel;
 
 typedef enum {
@@ -18,6 +18,16 @@ typedef enum {
 	ModeByte =    4  // 0100
 } EncodeModeIndicator;
 
+typedef struct {
+	int totalCodeWords;             /* Total Number of CodeWords in Block */
+	int ecCodeWords;                /* Number of Error Correction Code Words in Block */
+	int dataCodeWords;              /* Number of data Code Words in Block */
+} Block;
+
+typedef struct {
+	int numberOfBlocks;             /* Number of Data Blocks in Symbol */
+	const Block* block;             /* Array of Blocks */
+} BlockInfo;
 
 typedef struct {
 	int version;					/* Symbol version 1-40, 0 for auto */
@@ -34,20 +44,12 @@ typedef struct {
 	int ecCodeWords;				/* Number of Error Correction Code Words in Symbol */
 	int dataCodeWords;				/* Number of data Code Words in Symbol */
 
-	int blocks;						/* Number of dataBlocks in Symbol */
+	BlockInfo blockInfo;			/* Datablocks of Symbol */
+
+	int formatInfo;  				/* Encoded  Format Info. 15bit */
+	int versionInfo;				/* Encoded Version Info. 18bit */
 	
 } SymbolInfo;
-
-typedef struct {
-	int totalCodeWords;             /* total number of CodeWords in Block */
-	int ecCodeWords;                /* Number of Error Correction Code Words in Block */
-	int dataCodeWords;              /* Number of data Code Words in Block */
-} Block;
-
-typedef struct {
-	int numberOfBlocks;             /* Number of Data Blocks in Symbol */
-	Block* block;                   /* Array of Blocks */
-} BlockInfo;
 
 typedef struct {
 	int totalCodeWords;	

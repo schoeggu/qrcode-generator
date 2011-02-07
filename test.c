@@ -10,10 +10,10 @@
 #include <string.h>
 
 
+#define printbinary(A, B, C) {int _qw; printf((A)); printf(" "); for (_qw = (C)-1; _qw >= 0; _qw--) { printf("%d", ((B) >> _qw) & 1); } printf("\n");}
 
 int main(int argc, char** argv)
 {
-
 
 	if (argc < 4) { printf("galois [a|n] [l|m|q|h] ...\n"); return 0; }
 
