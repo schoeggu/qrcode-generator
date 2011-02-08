@@ -1,7 +1,7 @@
 #ifndef AP_H
 #define AP_H
 
-#include "../util.h"
+#include "util.h"
 
 typedef struct {
 	int x;

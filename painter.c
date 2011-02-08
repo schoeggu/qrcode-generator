@@ -7,8 +7,44 @@
 
 inline int getNumPixels(int version) { return 21 + 4 * (version - 1); }
 
+int image[] = {
+59972745, // 11100100110001110010001001
+36341083, // 10001010101000010101011011
+53157193, // 11001010110001110101001001
+36344137, // 10001010101001000101001001
+59939977 // 11100100101001110010001001
+};
+
 int index = 0;
 int bitNum = 7;
+
+void printBitmap(cairo_t* cr, int xx, int yy, int width, int height, int* data)
+{
+	cairo_save(cr);
+	cairo_set_source_rgba(cr, 1, 1, 1, 1);
+	cairo_rectangle(cr, xx++, yy++, width+4, height+4);
+	cairo_fill(cr);
+	cairo_set_source_rgba(cr, 0, 0, 0, 1);
+	cairo_rectangle(cr, xx++, yy++, width+2, height+2);
+	cairo_fill(cr);
+	
+	int x, y;
+	for(y = yy + height - 1; y >= yy; y--) {
+		int dat = data[y-yy];
+		for (x = xx + width - 1; x >= xx ; x--) {
+			if (dat & 1) {
+				cairo_rectangle(cr, x, y, 1, 1);
+			}
+			dat >>= 1;
+		}
+	}
+	
+	cairo_set_source_rgba(cr, 1, 1, 1, 1);
+	cairo_fill(cr);
+	
+	
+	cairo_restore(cr);
+}
 
 bool intersectsPattern(int x, int y, int version)
 {
@@ -144,45 +180,31 @@ void drawFormatInformation(cairo_t* cr, int version, int formatInfo)
 		formatInfo >>= 1;
 	}
 	cairo_fill(cr);
-	
-/*
-	cairo_set_source_rgba(cr, 0.8, 0.5, 0.4, 0.3);
-	
-	cairo_rectangle(cr, 0, 8, 6, 1);
-	cairo_fill(cr);
-
-	cairo_rectangle(cr, 7, 8, 2, 1);
-	cairo_fill(cr);
-	cairo_rectangle(cr, 8, 0, 1, 6);
-	cairo_fill(cr);
-	cairo_rectangle(cr, 8, 7, 1, 1);
-	cairo_fill(cr);
-
-	cairo_rectangle(cr, 8, numPixels-7, 1, 7);
-	cairo_fill(cr);
-	cairo_rectangle(cr, numPixels-8, 8, 8, 1);
-	cairo_fill(cr);
-
-	cairo_set_source_rgba(cr, 0, 0, 0, 1);
-	cairo_rectangle(cr, 8, numPixels-8, 1, 1);
-	cairo_fill(cr);
-	*/
 	cairo_restore(cr);
 }
 
-void drawVersionInformation(cairo_t* cr, int version)
+void drawVersionInformation(cairo_t* cr, int version, int versionInfo)
 {
 	if (version < 7) return;
 	
 	cairo_save(cr);
 	
 	int numPixels = getNumPixels(version);
-	cairo_set_source_rgba(cr, 0.4, 0.5, 0.8, 0.3);
+	
+	cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1);
+	
+	int x, y;
+	for (x = 0; x < 6; x++) {
+		for (y = numPixels - 11; y < numPixels - 8; y++) {
+			if (versionInfo & 1) {
+				cairo_rectangle(cr, x, y, 1, 1);
+				cairo_rectangle(cr, y, x, 1, 1);
+			}
+			versionInfo >>= 1;
 
-	cairo_rectangle(cr, 0, numPixels - 11, 6, 3);
-	cairo_fill(cr);
-
-	cairo_rectangle(cr, numPixels - 11, 0, 3, 6);
+		}
+	}
+	
 	cairo_fill(cr);
 	
 	cairo_restore(cr);
@@ -283,7 +305,9 @@ void paint_to_surface(cairo_surface_t* surface, const SymbolInfo* si, int size)
 	drawData(cr, si);
 
 	drawFormatInformation(cr, si->version, si->formatInfo);
-	drawVersionInformation(cr, si->version);
+	drawVersionInformation(cr, si->version, si->versionInfo);
+	
+	printBitmap(cr, 9, 18, 26, 5, image);
 
 	cairo_destroy(cr);
 }
