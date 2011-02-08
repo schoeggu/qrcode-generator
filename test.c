@@ -91,9 +91,11 @@ int main(int argc, char** argv)
 	}	
 	if (mode == 0) return 0;
 	
+	sourceSize= 2000;
 	
 	cairo_rectangle_t rect = {0, 0, sourceSize, sourceSize};
 	surface = cairo_recording_surface_create(CAIRO_CONTENT_COLOR_ALPHA, &rect);
+	
 	
 	GtkWidget* window;
 	gtk_init(&argc, &argv);
@@ -104,8 +106,13 @@ int main(int argc, char** argv)
 	gtk_widget_set_app_paintable(window, TRUE);
 	g_signal_connect(G_OBJECT(drawArea), "expose_event", G_CALLBACK(expose_event_callback), NULL);
 	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
 	
 
+
+	cairo_surface_t* sur = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, sourceSize, sourceSize);
+
+	cairo_t* cr = cairo_create(sur);
 
 	
 
@@ -119,6 +126,10 @@ int main(int argc, char** argv)
 		ret = qrgen_generate((byte*)argv[3], strlen(argv[3]), mode, ecLevel, surface, sourceSize);
 	}
 
+	
+	cairo_set_source_surface(cr, surface, 0, 0);
+	cairo_paint(cr);
+	cairo_surface_write_to_png(sur, "hello.png");
 
 
 	if (ret) {
@@ -129,8 +140,14 @@ int main(int argc, char** argv)
 
 	qrgen_destroy();
 	
+
 	gtk_widget_show_all(window);
 	gtk_main();
+
+
+	cairo_destroy(cr);
+	cairo_surface_destroy(sur);
+	cairo_surface_destroy(surface);
 
 	return 0;
 }

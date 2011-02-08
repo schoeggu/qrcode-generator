@@ -8,11 +8,11 @@
 inline int getNumPixels(int version) { return 21 + 4 * (version - 1); }
 
 int image[] = {
-59972745, // 11100100110001110010001001
-36341083, // 10001010101000010101011011
-53157193, // 11001010110001110101001001
-36344137, // 10001010101001000101001001
-59939977 // 11100100101001110010001001
+119938185, // 111001001100001110010001001
+72680795, // 100010101010000010101011011
+106306889, // 110010101100001110101001001
+72683849, // 100010101010001000101001001
+119872649 // 111001001010001110010001001
 };
 
 int index = 0;
@@ -22,7 +22,7 @@ void printBitmap(cairo_t* cr, int xx, int yy, int width, int height, int* data)
 {
 	cairo_save(cr);
 	cairo_set_source_rgba(cr, 1, 1, 1, 1);
-	cairo_rectangle(cr, xx++, yy++, width+4, height+4);
+	cairo_rectangle(cr, xx++ -1, yy++ -1, width+4+2, height+4+2);
 	cairo_fill(cr);
 	cairo_set_source_rgba(cr, 0, 0, 0, 1);
 	cairo_rectangle(cr, xx++, yy++, width+2, height+2);
@@ -281,7 +281,7 @@ void paint_to_surface(cairo_surface_t* surface, const SymbolInfo* si, int size)
 	cairo_t* cr;
 	cr = cairo_create(surface);	
 
-	cairo_scale(cr, size/numPixels, size/numPixels);
+	cairo_scale(cr, (float)size/numPixels, (float)size/numPixels);
 
 	cairo_set_source_rgb(cr, 1, 1, 1);
 
@@ -307,7 +307,7 @@ void paint_to_surface(cairo_surface_t* surface, const SymbolInfo* si, int size)
 	drawFormatInformation(cr, si->version, si->formatInfo);
 	drawVersionInformation(cr, si->version, si->versionInfo);
 	
-	printBitmap(cr, 9, 18, 26, 5, image);
+//	printBitmap(cr, 7, 18, 27, 5, image);
 
 	cairo_destroy(cr);
 }

@@ -8,14 +8,16 @@ BIN_C	= test.c \
 		  gp.c \
 		  symbolinfo.c \
 		  qrgen.c \
+		  ap.c \
+		  painter.c \
 
 LIB_NAME = 
 LIB_C   = 
 
 DEPENDFILE = .depend
 
-#PKGCONFIGCFLAGS = $(shell pkg-config --cflags cairo)
-#PKGCONFIGLIBS = $(shell pkg-config --libs cairo)
+PKGCONFIGCFLAGS = $(shell pkg-config --cflags cairo gtk+-2.0)
+PKGCONFIGLIBS = $(shell pkg-config --libs cairo gtk+-2.0)
 
 LIB_SRC = $(LIB_C) $(LIB_CPP)
 LIB_OBJ = $(LIB_CPP:%.cpp=%.o)
@@ -40,11 +42,11 @@ ifdef O
 CFLAGS += -O$O
 endif
 
-#CPPFLAGS += $(CFLAGS)
+CPPFLAGS += $(CFLAGS)
 
 CFLAGS +=
 
-#LDFLAGS += $(PKGCONFIGLIBS)
+LDFLAGS += $(PKGCONFIGLIBS)
 
 .PHONY : clean all depend
 
