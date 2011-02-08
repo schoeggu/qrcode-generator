@@ -2,9 +2,11 @@
 
 #include "ec.h"
 #include "gp.h"
+#include "ap.h"
 #include "symbolinfo.h"
 #include "bitstream.h"
 #include "dataencoder.h"
+#include "painter.h"
 
 #include <stdio.h>
 
@@ -21,12 +23,14 @@ void qrgen_init()
 	calculate_galois_field(PP);
 	initialize_gp();
 	si_init_codewords();
+	initialize_ap();
 }
 
 void qrgen_destroy()
 {
 	destroy_gp();
 	si_destroy_codewords();
+	destroy_ap();
 }
 
 bool qrgen_generate(const byte* data, int dataSize, EncodeModeIndicator mode, ECLevel ecLevel, cairo_surface_t* surface, int pixSize)
@@ -41,8 +45,8 @@ bool qrgen_generate_force_version(const byte* data, int dataSize, int version, E
 	SymbolInfo si;
 	bool ret = si_init(&si, data, dataSize, mode, ecLevel);
 	if (!ret) return false;
-
-	ret = si_set_version(&si, version);
+	
+	ret = si_set_version(&si, version); /* set desired version, if version is 0 the Program chooses itself */
 	if (!ret) return false;
 
 	/* 2. encode data */
@@ -59,20 +63,19 @@ bool qrgen_generate_force_version(const byte* data, int dataSize, int version, E
 	if (!ret) return false;
 
 	/* 4. Mask data */
-	//TODO choose mask
-	int mask = 0;
+	//TODO automaticly choose best mask
+	int mask = 3;
+	si.mask = 3;
 
 	/* 5. Calculate Format Information */
-
 	// 5 bit formatinfo: 2 bits ecLevel and 3 bits mask indicator
 	// add 10 bits of error correction code
-	// XOR with 0x5412, to ensure that no combination of ecLevel and Mask will result in an all-zero data.
+	// XOR with 101010000010010, to ensure that no combination of ecLevel and Mask will result in an all-zero data.
 	int format = (si.ecLevel << 3) | (mask & 7);
 	format = format << 10 | bch(15, 5, format, 0x537); // 0x537 = 10100110111 = x^10 + x^8 + x^5 + x^4 + x^2 + x^ + 1
 	si.formatInfo = format ^ 0x5412; // 101010000010010
 
 	/* 6. Calculate Version Information */
-
 	// only needed from Version 7 and upwards
 	// 6 bit versioninfo, add 12 bits of error correction code
 	if (si.version >= 7) {
@@ -80,10 +83,9 @@ bool qrgen_generate_force_version(const byte* data, int dataSize, int version, E
 	}
 
 	/* 7. draw QrCode */
+	paint_to_surface(surface, &si, pixSize);
 
-	/***
-	 * *  TMP
-	 * */
+	/*** TMP ***/
 	printf("\nfinal\n");
 	printarray(si.encodedData, si.totalCodeWords);
 	printf("version      %d\n", si.version);
@@ -104,9 +106,7 @@ bool qrgen_generate_force_version(const byte* data, int dataSize, int version, E
 		printf("  block[%d].ecCW    %d\n", q, si.blockInfo.block[q].ecCodeWords);
 		printf("  block[%d].dataCW  %d\n\n", q, si.blockInfo.block[q].dataCodeWords);
 	}
-	/***
-	 * *  TMP
-	 * */
+	/***  TMP  ***/
 
 	/* 8. free memory */
 	bs_destroy(bs);

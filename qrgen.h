@@ -4,8 +4,8 @@
 #include "util.h"
 #include "symbolinfo.h"
 
-//#include "cairo.h"
-typedef struct {} cairo_surface_t;
+#include "cairo.h"
+//typedef struct {} cairo_surface_t;
 
 void qrgen_init();
 void qrgen_destroy();

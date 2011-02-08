@@ -50,6 +50,8 @@ typedef struct {
 	int formatInfo;  				/* Encoded  Format Info. 15bit */
 	int versionInfo;				/* Encoded Version Info. 18bit */
 	
+	int mask;						/* Mask indicator. 3 bit*/
+	
 } SymbolInfo;
 
 typedef struct {

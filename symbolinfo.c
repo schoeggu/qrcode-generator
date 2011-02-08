@@ -168,6 +168,7 @@ void si_reset(SymbolInfo* si)
 	si->totalCodeWords           = 0;
 	si->ecCodeWords              = 0;
 	si->dataCodeWords            = 0;
+	si->mask                     = 0;
 	si->blockInfo.numberOfBlocks = 0;
 	si->blockInfo.block          = NULL;
 
