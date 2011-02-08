@@ -36,6 +36,7 @@ typedef struct {
 	ECLevel ecLevel;				/* Error Correction Level: L, M, Q or H */
 
 	const byte* inputData;			/* Pointer to the data */
+	byte* encodedData;   			/* Pointer to the final data set */
 	int dataCount;					/* Count of how many data elements */
 	int encodedDataCount;           /* Number of bytes after encoding */
 	EncodeModeIndicator encodeMode; /* Encode Mode: Byte, Alph or Numeric */

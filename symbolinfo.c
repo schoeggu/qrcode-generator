@@ -10,6 +10,8 @@ codeWords* cw;
 
 bool si_init(SymbolInfo* si, const byte* data, int dataCount, EncodeModeIndicator mode, ECLevel level)
 {
+	si->encodedData = NULL;
+	si->blockInfo.block = NULL;
 	si_reset(si);
 	si_set_data(si, data, dataCount, mode);
 	si_set_eclevel(si, level);
@@ -168,6 +170,11 @@ void si_reset(SymbolInfo* si)
 	si->dataCodeWords            = 0;
 	si->blockInfo.numberOfBlocks = 0;
 	si->blockInfo.block          = NULL;
+
+	if (si->encodedData) {
+		free(si->encodedData);
+		si->encodedData = NULL;
+	}
 }
 
 
@@ -260,6 +267,13 @@ bool si_init_codewords()
 void si_destroy_codewords()
 {
 	if (cw_initialized) {
+		int i;
+		int j;
+		for (j = 0; j < 40; j++) {
+			for(i = 0; i < 4; i++) {
+				free(cw[j].blocks[i].block);
+			}
+		}
 		free(cw);
 		cw_initialized = false;
 	}

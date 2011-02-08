@@ -10,6 +10,12 @@
 
 #define printarray(A, B) { int q; for (q=0; q < (B); q++) { printf("%d\t", (A)[q]); } printf("\n"); }
 
+/*
+ * split up in datablocks and calcualte error corrction
+ */
+bool blockwiseErrorCorrection(SymbolInfo* si, bitstream* bs);
+
+
 void qrgen_init()
 {
 	calculate_galois_field(PP);
@@ -40,7 +46,6 @@ bool qrgen_generate_force_version(const byte* data, int dataSize, int version, E
 	if (!ret) return false;
 
 	/* 2. encode data */
-	//TODO blocks
 	bitstream* bs = bs_init();
 	if (!bs) {
 		fprintf(stderr, "Error: Counldn't initialize bitstream\n");
@@ -49,19 +54,12 @@ bool qrgen_generate_force_version(const byte* data, int dataSize, int version, E
 	ret = encodeData(bs, &si);
 	if (!ret) return false;
 
-	/* 3. calculate error correction */
-	//TODO blocks
-	byte* encData = malloc(si.dataCodeWords);
-	byte* errorCorrection = malloc(si.ecCodeWords);
-
-	bs_geta(bs, encData, 0, si.dataCodeWords);
-
-	ret = generateErrorCorrectionCode(encData, si.dataCodeWords, errorCorrection, si.ecCodeWords);
+	/* 3. split up in datablocks and calculate error correction */
+	ret = blockwiseErrorCorrection(&si, bs);
 	if (!ret) return false;
 
-	bs_add_bs(bs, errorCorrection, si.ecCodeWords, si.ecCodeWords * 8);
-
 	/* 4. Mask data */
+	//TODO choose mask
 	int mask = 0;
 
 	/* 5. Calculate Format Information */
@@ -83,16 +81,11 @@ bool qrgen_generate_force_version(const byte* data, int dataSize, int version, E
 
 	/* 7. draw QrCode */
 
-
 	/***
 	 * *  TMP
 	 * */
-	bs_print_full(bs);
-	byte* c = malloc(si.totalCodeWords);
-	bs_geta(bs, c, 0, si.totalCodeWords);
-	printarray(c, si.totalCodeWords);
-	free(c);
-	c = NULL;
+	printf("\nfinal\n");
+	printarray(si.encodedData, si.totalCodeWords);
 	printf("version      %d\n", si.version);
 	printf("autoversion  %d\n", si.autoVersion);
 	printf("eclevel      %d\n", si.ecLevel);
@@ -111,18 +104,76 @@ bool qrgen_generate_force_version(const byte* data, int dataSize, int version, E
 		printf("  block[%d].ecCW    %d\n", q, si.blockInfo.block[q].ecCodeWords);
 		printf("  block[%d].dataCW  %d\n\n", q, si.blockInfo.block[q].dataCodeWords);
 	}
-
 	/***
 	 * *  TMP
 	 * */
 
 	/* 8. free memory */
+	bs_destroy(bs);
+	bs = NULL;
+
+	si_reset(&si);
+
+	return true;
+}
+
+bool blockwiseErrorCorrection(SymbolInfo* si, bitstream* bs)
+{
+
+	const BlockInfo bi = si->blockInfo;
+
+	byte* finalData = malloc(si->totalCodeWords);
+	byte** encData = malloc(bi.numberOfBlocks * sizeof(byte*));
+	byte** errorCorrection = malloc(bi.numberOfBlocks * sizeof(byte*));
+	
+	int position = 0;
+	int i;
+	for (i = 0; i < bi.numberOfBlocks; i++) {
+		int dataCW = bi.block[i].dataCodeWords;
+		int ecCW = bi.block[i].ecCodeWords;
+		
+		encData[i] = malloc(dataCW);
+		errorCorrection[i] = malloc(ecCW);
+
+		bs_geta(bs, encData[i], position, dataCW);
+		position += dataCW;
+
+		bool ret = generateErrorCorrectionCode(encData[i], dataCW, errorCorrection[i], ecCW);
+		if (!ret) return false;
+		printf("\nBlock %d\n", i);
+		printarray(encData[i], dataCW);
+		printarray(errorCorrection[i], ecCW);
+	}
+
+	//add data to final string
+	int j;
+	int index = 0;
+	for (i = 0; i < bi.block[bi.numberOfBlocks-1].dataCodeWords; i++) {
+		for (j = 0; j < bi.numberOfBlocks; j++) {
+			if (bi.block[j].dataCodeWords <= i) continue;
+			finalData[index++] = encData[j][i];
+		}
+	}
+
+	for (i = 0; i < bi.block[bi.numberOfBlocks - 1].ecCodeWords; i++) {
+		for (j = 0; j < bi.numberOfBlocks; j++) {
+			if (bi.block[j].ecCodeWords <= i) continue;
+			finalData[index++] = errorCorrection[j][i];
+		}
+	}
+
+	if (si->encodedData) free(si->encodedData); 
+	si->encodedData = finalData;
+
+	for (i = 0; i < si->blockInfo.numberOfBlocks; i++) {
+		free(encData[i]);
+		free(errorCorrection[i]);
+	}
 	free(encData);
 	free(errorCorrection);
-	bs_destroy(bs);
 	encData = NULL;
 	errorCorrection = NULL;
-	bs = NULL;
+	finalData = NULL;
 
 	return true;
 }
