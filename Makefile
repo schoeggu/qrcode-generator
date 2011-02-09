@@ -10,6 +10,7 @@ BIN_C	= test.c \
 		  qrgen.c \
 		  ap.c \
 		  painter.c \
+		  window.c \
 
 LIB_NAME = 
 LIB_C   = 
