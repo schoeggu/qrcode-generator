@@ -212,6 +212,11 @@ int main(int argc, char** argv)
 		
 	cairo_surface_destroy(surface);
 
+	free(data);
+	free(filename);
+	data = NULL;
+	filename = NULL;
+
 	return 0;
 }
 

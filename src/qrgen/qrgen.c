@@ -9,6 +9,7 @@
 #include "painter.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #define printarray(A, B) { int q; for (q=0; q < (B); q++) { printf("%d\t", (A)[q]); } printf("\n"); }
 
@@ -126,6 +127,7 @@ bool blockwiseErrorCorrection(SymbolInfo* si, bitstream* bs)
 	byte** encData = malloc(bi.numberOfBlocks * sizeof(byte*));
 	byte** errorCorrection = malloc(bi.numberOfBlocks * sizeof(byte*));
 	
+	bool ret = true;
 	int position = 0;
 	int i;
 	for (i = 0; i < bi.numberOfBlocks; i++) {
@@ -138,8 +140,8 @@ bool blockwiseErrorCorrection(SymbolInfo* si, bitstream* bs)
 		bs_geta(bs, encData[i], position, dataCW);
 		position += dataCW;
 
-		bool ret = generateErrorCorrectionCode(encData[i], dataCW, errorCorrection[i], ecCW);
-		if (!ret) return false;
+		ret = generateErrorCorrectionCode(encData[i], dataCW, errorCorrection[i], ecCW);
+		if (!ret) goto Error;
 		printf("\nBlock %d\n", i);
 		printarray(encData[i], dataCW);
 		printarray(errorCorrection[i], ecCW);
@@ -163,17 +165,21 @@ bool blockwiseErrorCorrection(SymbolInfo* si, bitstream* bs)
 	}
 
 	if (si->encodedData) free(si->encodedData); 
-	si->encodedData = finalData;
+	si->encodedData = malloc(si->totalCodeWords);
+	memcpy(si->encodedData, finalData, si->totalCodeWords);
 
+
+Error: 
 	for (i = 0; i < si->blockInfo.numberOfBlocks; i++) {
 		free(encData[i]);
 		free(errorCorrection[i]);
 	}
 	free(encData);
 	free(errorCorrection);
+	free(finalData);
 	encData = NULL;
 	errorCorrection = NULL;
 	finalData = NULL;
 
-	return true;
+	return ret;
 }

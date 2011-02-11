@@ -86,8 +86,8 @@ bool encodeNumeric(bitstream* bs, const byte* data, int dataSize)
 	int i;
 	unsigned int block; 
 	int blockSize = 10;
-	byte* tdata = malloc(dataSize);
-	byte* tmp = tdata;
+	byte* tmp = malloc(dataSize);
+	byte* tdata = tmp;
 
 	//change from alpha to int
 	for (i = 0; i < dataSize; i++) {
@@ -114,6 +114,8 @@ bool encodeNumeric(bitstream* bs, const byte* data, int dataSize)
 	}
 
 	free(tmp);
+	tmp = NULL;
+	tdata = NULL;
 
 	return true;
 }
