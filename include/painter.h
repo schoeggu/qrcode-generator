@@ -7,6 +7,6 @@
 
 #include "symbolinfo.h"
 
-	void paint_to_surface(cairo_surface_t* surface, const SymbolInfo* si, int size);
+void paint_to_surface(cairo_surface_t* surface, const SymbolInfo* si, int size);
 
 #endif //PAINTER_H

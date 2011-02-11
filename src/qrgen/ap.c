@@ -9,7 +9,7 @@ static bool ap_initialized = false;
 
 void initialize_ap()
 {
-	FILE* file = fopen("./ap.rc", "r");
+	FILE* file = fopen("./rc/ap.rc", "r");
 	if (!file) {
 		exit(1);
 	}

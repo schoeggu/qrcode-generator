@@ -1,7 +1,6 @@
 #include "painter.h"
 #include "ap.h"
 
-#include <gtk/gtk.h>
 #include <cairo.h>
 #include <stdlib.h>
 

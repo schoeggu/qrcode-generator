@@ -183,7 +183,7 @@ void si_reset(SymbolInfo* si)
 
 bool si_init_codewords()
 {
-	FILE* file = fopen("./si.rc", "r");
+	FILE* file = fopen("./rc/si.rc", "r");
 	if (!file) {
 		exit(1);
 	}

@@ -18,8 +18,6 @@
 void printHelp(char* progname);
 
 
-
-
 int main(int argc, char** argv)
 {
 	EncodeModeIndicator mode = ModeByte;
@@ -30,7 +28,7 @@ int main(int argc, char** argv)
 	char* filename = NULL;
 	char filetype[4];
 	int size = 200;
-	int displaySize;
+	int displaySize = 200;
 	int len;
 	
 	int opt;
@@ -179,9 +177,9 @@ int main(int argc, char** argv)
 	
 	bool ret;
 	if (version) {
-		ret = qrgen_generate_force_version(data, dataLen, version, mode, ecLevel, surface, size);
+		ret = qrgen_generate_force_version((byte*)data, dataLen, version, mode, ecLevel, surface, size);
 	} else {
-		ret = qrgen_generate(data, dataLen, mode, ecLevel, surface, size);
+		ret = qrgen_generate((byte*)data, dataLen, mode, ecLevel, surface, size);
 	}
 	
 	qrgen_destroy();
@@ -233,7 +231,8 @@ void printHelp(char* progname)
 			"[-f file]         Save the qrcode to the specified file.\n"
 			"                  If -f is not set, the programm displays the qrcode in a window.\n"
 			"                  NOTE: Only png and svg are supported.\n\n"
-			"[-s size]         Qrcode Size in Pixels.\n\n"
+			"[-s size]         Qrcode Size in Pixels.\n"
+			"                  Default 200.\n\n"
 			"[-h]              Print this help.\n\n"
 			"data              The data to encode.\n", progname);
 }

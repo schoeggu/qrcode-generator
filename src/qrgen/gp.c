@@ -9,7 +9,7 @@ static bool gp_initialized = false;
 
 void initialize_gp()
 {
-	FILE* file = fopen("./gp.rc", "r");
+	FILE* file = fopen("./rc/gp.rc", "r");
 	if (!file) {
 		exit(1);
 	}

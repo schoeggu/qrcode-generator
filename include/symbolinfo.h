@@ -1,7 +1,6 @@
 #ifndef SYMBOLINFO_H
 #define SYMBOLINFO_H
 
-//#include "dataencoder.h"
 #include "util.h"
 
 typedef enum {
