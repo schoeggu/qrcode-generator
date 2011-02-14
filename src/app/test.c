@@ -176,11 +176,7 @@ int main(int argc, char** argv)
 	printf("data: [%s], len[%d]\n", data, dataLen);
 	
 	bool ret;
-	if (version) {
-		ret = qrgen_generate_force_version((byte*)data, dataLen, version, mode, ecLevel, surface, size);
-	} else {
-		ret = qrgen_generate((byte*)data, dataLen, mode, ecLevel, surface, size);
-	}
+	ret = qrgen_generate_force_version((byte*)data, dataLen, version, mode, ecLevel, surface, size);
 	
 	qrgen_destroy();
 	
