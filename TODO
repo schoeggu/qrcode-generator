@@ -8,7 +8,8 @@ Now, there are 3 .rc files in the rc folder. We need to make the program find th
 or hardcode the data into the sourcecode.
 
 - Better Makefiles
-	- Use Autotools
+	- Use Autotools or CMake
+	- Make them work on windows, linux and os x
 	- Discover if there is no gtk+-2.0 and then don't build -w support in sample program.
 
 - Make the library more resistant to invalid input and other errors.
@@ -21,3 +22,8 @@ or hardcode the data into the sourcecode.
 	- Make it possible to write directly to a file, without supplying a cairo surface.
 	- Make it possible to choose, where on the surface the qrcode is drawn.
 	- Support other graphic libraries than cairo.
+	
+- Option to choose optimal size
+	For example, version 3 has 29x29 bits, maybe we want each bit to be an absolute number of pixels wide
+	so for every bit to be 3x3 Pixels, size needs to be 29*3 = 87. Let the program calculate that by itself.
+	If we have version 5 (37x37) and say size = 340, the nearest optimal size is 333 (9*37).

@@ -58,7 +58,9 @@ Free the allocated Memory again
 Generate a qrcode and draw it to `surface`
 
 	bool qrgen_generate(const byte* data, int dataSize, int version, EncodeModeIndicator mode, ECLevel ecLevel, cairo_surface_t* surface, int pixSize)
+	
 Parameters:
+
 - `data`      The data you want to encode.
 - `dataSize`  Number of bytes in data.
 - `version`   The Symbol Version. 1 - 40. If 0, qrgen chooses the smallest possible version.
@@ -66,7 +68,9 @@ Parameters:
 - `ecLevel`   Error Correction Level.
 - `surface`   The surface to which qrgen paints.
 - `pixSize`   Size of the qrcode in pixels.
+
 Returns:
+
 - `true`      if Succeeded
 - `false`     if Failed
 
@@ -95,6 +99,14 @@ Example:
 		return 0;
 	}
 	
+Building
+--------
+
+Just call make
+	make
+If you want gtk support (for -w option) call
+	make USE_GTK=1
+_NOTE:_ There is a directory called *rc*. The programm only works if you call it from the directory containing that rc directory. This is pretty annoying an i am going to fix that soon.
 
 License
 -------

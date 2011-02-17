@@ -34,13 +34,7 @@ void qrgen_destroy()
 	destroy_ap();
 }
 
-bool qrgen_generate(const byte* data, int dataSize, EncodeModeIndicator mode, ECLevel ecLevel, cairo_surface_t* surface, int pixSize)
-{
-	// Version 0: Programm chooses smallest possible Version
-	return qrgen_generate_force_version(data, dataSize, 0, mode, ecLevel, surface, pixSize);
-}
-
-bool qrgen_generate_force_version(const byte* data, int dataSize, int version, EncodeModeIndicator mode, ECLevel ecLevel, cairo_surface_t* surface, int pixSize)
+bool qrgen_generate(const byte* data, int dataSize, int version, EncodeModeIndicator mode, ECLevel ecLevel, cairo_surface_t* surface, int pixSize)
 {
 	/* 1. init symbolinfo and check if data is ok */
 	SymbolInfo si;
