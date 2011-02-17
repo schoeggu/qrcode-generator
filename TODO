@@ -1,0 +1,23 @@
+Things Todo:
+
+- Make the library choose the best optimal mask pattern.
+As for now, it allways chooses mask 3.
+
+- Get rid of the 3 .rc files.
+Now, there are 3 .rc files in the rc folder. We need to make the program find the rc files (for example at /usr/local/share/qrgen or ~/.qrgen),
+or hardcode the data into the sourcecode.
+
+- Better Makefiles
+	- Use Autotools
+	- Discover if there is no gtk+-2.0 and then don't build -w support in sample program.
+
+- Make the library more resistant to invalid input and other errors.
+
+- Create an gui example program
+
+- Create man pages for programs and headers
+
+- Improve api for the library
+	- Make it possible to write directly to a file, without supplying a cairo surface.
+	- Make it possible to choose, where on the surface the qrcode is drawn.
+	- Support other graphic libraries than cairo.

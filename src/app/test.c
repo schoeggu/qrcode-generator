@@ -1,8 +1,3 @@
-#include "ec.h"
-#include "gp.h"
-#include "bitstream.h"
-#include "dataencoder.h"
-#include "symbolinfo.h"
 #include "qrgen.h"
 #include "window.h"
 
@@ -176,7 +171,7 @@ int main(int argc, char** argv)
 	printf("data: [%s], len[%d]\n", data, dataLen);
 	
 	bool ret;
-	ret = qrgen_generate_force_version((byte*)data, dataLen, version, mode, ecLevel, surface, size);
+	ret = qrgen_generate((byte*)data, dataLen, version, mode, ecLevel, surface, size);
 	
 	qrgen_destroy();
 	
