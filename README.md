@@ -36,11 +36,11 @@ Usage (Sample Program)
 	
 For Example:
 
-	$ qrgen -m b -e h -f ./filename.svg -s 180 https://github.com/schoeggu/qrcode-generator
+	$ qrgen -m b -e h -f ./filename.svg -s 111 https://github.com/schoeggu/qrcode-generator
 
 Will create this:
 
-![filename.svg](./doc/images/qrgen1.png)
+![generated QR Code](http://img534.imageshack.us/img534/1316/qrgen1.png)
 	
 Usage (Library)
 ---------------
@@ -59,9 +59,9 @@ Free the allocated Memory again
 
 	void qrgen_destroy()
 	
-Generate a qrcode and draw it to `surface`
+Generate a qrcode and draw it to `context`
 
-	bool qrgen_generate(const byte* data, int dataSize, int version, EncodeModeIndicator mode, ECLevel ecLevel, cairo_surface_t* surface, int pixSize)
+	bool qrgen_generate(const byte* data, int dataSize, int version, EncodeModeIndicator mode, ECLevel ecLevel, cairo__t* context, int pixSize)
 	
 Parameters:
 
@@ -70,7 +70,7 @@ Parameters:
 - `version`   The Symbol Version. 1 - 40. If 0, qrgen chooses the smallest possible version.
 - `mode`      Encode Mode.
 - `ecLevel`   Error Correction Level.
-- `surface`   The surface to which qrgen paints.
+- `context`   The cairo context to which is painted.
 - `pixSize`   Size of the qrcode in pixels.
 
 Returns:
@@ -85,7 +85,7 @@ Example:
 
 	int main(int argc, char** argv)
 	{
-		cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 315, 315);
+		cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 105, 105);
 		cairo_t* cr = cairo_create(surface);
 		
 		/* initialize qrgen */
@@ -93,8 +93,8 @@ Example:
 		
 		/* generate qrcode and draw it to the surface    */
 		/* Version: auto, Encode mode: Alphanumeric      */
-		/* Error correction level: Medium, Size: 315x315 */
-		qrgen_generate((byte*)"Hello Old Friend", 17, 0, ModeAlpha, EC_M, cr, 315);
+		/* Error correction level: Medium, Size: 105x105 */
+		qrgen_generate((byte*)"Hello Old Friend", 17, 0, ModeAlpha, EC_M, cr, 105);
 
 		/* write the qrcode to a file */
 		cairo_surface_write_to_png(surface, "hi.png");
@@ -108,8 +108,10 @@ Example:
 		return 0;
 	}
 
+	
 Will generate this:
-![hi.png](./doc/images/qrgen2.png)
+
+![generated_QR_Code](http://img291.imageshack.us/img291/5615/qrgen2.png)
 	
 Building
 --------
