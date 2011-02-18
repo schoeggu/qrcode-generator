@@ -11,6 +11,7 @@ void initialize_ap()
 {
 	FILE* file = fopen("./rc/ap.rc", "r");
 	if (!file) {
+		fprintf(stderr, "Error: File not found './rc/ap.rc");
 		exit(1);
 	}
 

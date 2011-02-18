@@ -185,6 +185,7 @@ bool si_init_codewords()
 {
 	FILE* file = fopen("./rc/si.rc", "r");
 	if (!file) {
+		fprintf(stderr, "Error: File not found './rc/si.rc");
 		exit(1);
 	}
 	

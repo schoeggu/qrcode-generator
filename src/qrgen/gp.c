@@ -11,6 +11,7 @@ void initialize_gp()
 {
 	FILE* file = fopen("./rc/gp.rc", "r");
 	if (!file) {
+		fprintf(stderr, "Error: File not found './rc/gp.rc");
 		exit(1);
 	}
 
