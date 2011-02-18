@@ -40,7 +40,7 @@ For Example:
 
 Will create this:
 
-![generated QR Code](http://img534.imageshack.us/img534/1316/qrgen1.png)
+![generated QR Code](http://img11.imageshack.us/img11/1316/qrgen1.png)
 	
 Usage (Library)
 ---------------
@@ -111,7 +111,7 @@ Example:
 	
 Will generate this:
 
-![generated_QR_Code](http://img291.imageshack.us/img291/5615/qrgen2.png)
+![generated_QR_Code](http://img26.imageshack.us/img26/5615/qrgen2.png)
 	
 Building
 --------
