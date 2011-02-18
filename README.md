@@ -40,7 +40,7 @@ For Example:
 
 Will create this:
 
-![generated QR Code](doc/images/qrgen1.png)
+![filename.svg](./doc/images/qrgen1.png)
 	
 Usage (Library)
 ---------------
@@ -109,7 +109,7 @@ Example:
 	}
 
 Will generate this:
-![generated QR Code](doc/images/qrgen2.png)
+![hi.png](./doc/images/qrgen2.png)
 	
 Building
 --------
