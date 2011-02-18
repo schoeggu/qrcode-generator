@@ -26,6 +26,7 @@ int main(int argc, char** argv)
 	int displaySize = 200;
 	int len;
 	
+	
 	int opt;
     while ((opt = getopt(argc, argv, "m:e:v:wf:s:h")) != -1) {
         switch (opt) {
@@ -171,11 +172,14 @@ int main(int argc, char** argv)
 	printf("data: [%s], len[%d]\n", data, dataLen);
 	
 	bool ret;
-	ret = qrgen_generate((byte*)data, dataLen, version, mode, ecLevel, surface, size);
+	cairo_t* cr = cairo_create(surface);
+	ret = qrgen_generate((byte*)data, dataLen, version, mode, ecLevel, cr, size);
+	cairo_destroy(cr);
 	
 	qrgen_destroy();
 	
 	if (ret) {
+		printf(" generated\n");
 		if (writeToFile) {
 			cairo_surface_t* sur;
 			if (!strcmp(filetype, "png")) {
@@ -199,8 +203,10 @@ int main(int argc, char** argv)
 		if (displayWindow) {
 			displayInWindow(surface, size, displaySize, displaySize, argc, argv);
 		}
+	} else {
+		printf("not generated\n");
 	}
-		
+			
 	cairo_surface_destroy(surface);
 
 	free(data);

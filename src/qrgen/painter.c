@@ -268,17 +268,14 @@ void drawData(cairo_t* cr, const SymbolInfo* si)
 	cairo_restore(cr);
 }
 
-void paint_to_surface(cairo_surface_t* surface, const SymbolInfo* si, int size)
+void paint_qrcode(cairo_t* cr, const SymbolInfo* si, int size)
 {
-	if (!si || !surface) return;
+	if (!si || !cr) return;
 	
 	index = 0;
 	bitNum = 7;
 
 	int numPixels = getNumPixels(si->version);
-
-	cairo_t* cr;
-	cr = cairo_create(surface);	
 
 	cairo_scale(cr, (float)size/numPixels, (float)size/numPixels);
 
@@ -308,5 +305,4 @@ void paint_to_surface(cairo_surface_t* surface, const SymbolInfo* si, int size)
 	
 //	printBitmap(cr, 7, 18, 27, 5, image);
 
-	cairo_destroy(cr);
 }

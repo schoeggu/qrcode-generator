@@ -34,7 +34,7 @@ void qrgen_destroy()
 	destroy_ap();
 }
 
-bool qrgen_generate(const byte* data, int dataSize, int version, EncodeModeIndicator mode, ECLevel ecLevel, cairo_surface_t* surface, int pixSize)
+bool qrgen_generate(const byte* data, int dataSize, int version, EncodeModeIndicator mode, ECLevel ecLevel, cairo_t* ctx, int pixSize)
 {
 	/* 1. init symbolinfo and check if data is ok */
 	SymbolInfo si;
@@ -78,7 +78,7 @@ bool qrgen_generate(const byte* data, int dataSize, int version, EncodeModeIndic
 	}
 
 	/* 7. draw QrCode */
-	paint_to_surface(surface, &si, pixSize);
+	paint_qrcode(ctx, &si, pixSize);
 
 	/*** TMP ***/
 	printf("\nfinal\n");
