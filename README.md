@@ -7,11 +7,12 @@ It comes with a sample program to demonstrate how to use the library.
 Requirements
 ------------
 - gnu tool chain
-- libCairo 1.10.0 or newer (probably works also with older releases, but i didn't test it)
+- libCairo >= 1.10.0 (probably works also with older releases, but i didn't test it)
 
 Optional:
 
-- gtk+-2.0
+- gtk+-2.0 >= 2.20.1
+- python >= 2.7
 
 Usage (Sample Program)
 ----------------------
@@ -36,7 +37,10 @@ Usage (Sample Program)
 For Example:
 
 	$ qrgen -m b -e h -f ./filename.svg -s 180 https://github.com/schoeggu/qrcode-generator
-	
+
+Will create this:
+
+![generated QR Code](doc/images/qrgen1.png)
 	
 Usage (Library)
 ---------------
@@ -78,35 +82,45 @@ Example:
 
 	#include "qrgen.h"
 	#include <cairo.h>
-	
+
 	int main(int argc, char** argv)
 	{
-		cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 300, 300);
+		cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 315, 315);
+		cairo_t* cr = cairo_create(surface);
 		
 		/* initialize qrgen */
 		qrgen_init();
 		
-		/* generate qrcode and draw it to the surface */
-		qrgen_generate("Hello, Old Friend", 17, 0, ModeAlpha, EC_M, surface, 300);
-	
+		/* generate qrcode and draw it to the surface    */
+		/* Version: auto, Encode mode: Alphanumeric      */
+		/* Error correction level: Medium, Size: 315x315 */
+		qrgen_generate((byte*)"Hello Old Friend", 17, 0, ModeAlpha, EC_M, cr, 315);
+
+		/* write the qrcode to a file */
 		cairo_surface_write_to_png(surface, "hi.png");
-	
+
 		/*tear down qrgen */
 		qrgen_destroy();
 		
+		cairo_destroy(cr);
 		cairo_surface_destroy(surface);
 		
 		return 0;
 	}
+
+Will generate this:
+![generated QR Code](doc/images/qrgen2.png)
 	
 Building
 --------
 
 Just call make
+
 	make
 If you want gtk support (for -w option) call
+
 	make USE_GTK=1
-_NOTE:_ There is a directory called *rc*. The programm only works if you call it from the directory containing that rc directory. This is pretty annoying an i am going to fix that soon.
+_NOTE:_ There is a directory called *rc*. The programm only works if you call it from the directory containing that *rc* directory. This is pretty annoying an i am going to fix that soon.
 
 License
 -------
@@ -114,7 +128,7 @@ License
 Copyright (C) 2011 Joel Sutter
 
 This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
+it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
@@ -123,9 +137,9 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-See LICENCE.txt
+See LICENCE.txt and GPL.txt
 
 NOTE: The term 'QR code' is a registered trademark of Denso Wave Incorporated.
