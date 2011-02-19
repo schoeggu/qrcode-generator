@@ -4,10 +4,13 @@ SUBDIRS = src
 all : subdirs
 
 install:
-	cp src/qrgen/libqrgen.so .
-	cp src/qrgen/libqrgen.so.1 .
-	cp src/app/qrgen .
 
-GENFILES = qrgen libqrgen.so libqrgen.so.1
+	if [ ! -h libqrgen.so.1 ]; then ln -s src/qrgen/libqrgen.so.1 . ; fi
+	if [ ! -h qrgen ]; then ln -s src/app/qrgen . ; fi
+	if [ ! -h pyqrgen.so.1 ]; then ln -s src/pyqrgen/pyqrgen.so.1 . ; fi
+	if [ ! -h test.py ]; then ln -s src/pyqrgen/test.py . ; fi
+	if [ ! -h window.py ]; then ln -s src/pyqrgen/window.py . ; fi
+
+GENFILES = qrgen libqrgen.so libqrgen.so.1 pyqrgen.so pyqrgen.so.1 test.py window.py
 
 include Makefile.master

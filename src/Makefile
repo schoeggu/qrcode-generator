@@ -1,6 +1,5 @@
-SUBDIRS = qrgen app
+SUBDIRS = qrgen app pyqrgen
 
 all: subdirs 
-app: qrgen
 
 include ../Makefile.master

@@ -14,7 +14,7 @@ static PyObject* pyqrgen_generate(PyObject *self, PyObject *args)
 {
 	
 	PycairoContext* pycr;
-	const char* data;
+	char* data;
 	int version;
 	int encMode;
 	int ecLevel;
@@ -22,9 +22,6 @@ static PyObject* pyqrgen_generate(PyObject *self, PyObject *args)
 	int dataLen;
 	
 	if(PyArg_ParseTuple(args, "s|i|i|i|O!|i", &data, &version, &encMode, &ecLevel, Pycairo_CAPI->Context_Type, &pycr, &pixSize)) {
-		
-		Py_XINCREF(data); 
-		Py_XINCREF(pycr); 
 		
 		printf("data: [%s]\n", data);
 		
@@ -49,16 +46,13 @@ static PyObject* pyqrgen_generate(PyObject *self, PyObject *args)
 	if (!cr) { printf ("cr is NULL\n"); }
 	
 	
-	bool ret = qrgen_generate(data, dataLen, version, encMode, ecLevel, cr, pixSize);
+	bool ret = qrgen_generate((byte*)data, dataLen, version, encMode, ecLevel, cr, pixSize);
 
 	if (ret) {
 	printf ("yes\n");
 	} else {
 	printf ("no\n");
 	}
-
-	Py_DECREF(pycr);
-	Py_DECREF(data); 
 
 	Py_INCREF(Py_None);
 	return Py_None;
@@ -70,11 +64,8 @@ static PyMethodDef QrgenMethods[] = {
 	{NULL, NULL, 0, NULL}
 };
 
-PyMODINIT_FUNC
-initpyqrgen(void)
+PyMODINIT_FUNC initpyqrgen(void)
 {
-
-
 	PyObject* m;
 
 	m = Py_InitModule("pyqrgen", QrgenMethods);
