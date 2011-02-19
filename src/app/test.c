@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <getopt.h>
 
 #include <cairo.h>
 #include <cairo-svg.h> 
@@ -26,9 +27,21 @@ int main(int argc, char** argv)
 	int displaySize = 200;
 	int len;
 	
+	struct option options[] = { 
+		{"mode", 1, NULL, 'm'},
+		{"eclevel", 1, NULL, 'e'},
+		{"symbol-version", 1, NULL, 'v'},
+		{"window", 0, NULL, 'w'},
+		{"file", 1, NULL, 'f'},
+		{"size", 1, NULL, 's'},
+		{"help", 0, NULL, 'h'},
+		{"version", 0, NULL, 'x'},
+		{0, 0, 0, 0}
+	};
 	
 	int opt;
-    while ((opt = getopt(argc, argv, "m:e:v:wf:s:h")) != -1) {
+	int idx;
+    while ((opt = getopt_long(argc, argv, "m:e:v:wf:s:hx", options, &idx)) != -1) {
         switch (opt) {
 		
         case 'm':
@@ -121,6 +134,10 @@ int main(int argc, char** argv)
         case 'h':
             printHelp(argv[0]);
             return 0;
+
+		case 'x':
+			printf("%s 0.1\n", argv[0]);
+			return 0;
 			
         default:
             fprintf(stderr, "Error: Unknown option: %c", (char)opt);
@@ -219,22 +236,24 @@ int main(int argc, char** argv)
 
 void printHelp(char* progname) 
 {
-	printf("usage: %s [-m mode] [-e errorCorrectionLevel] [-v version] [-w] [-f file] [-s size] [-h] data ...\n"
+	printf("%s 0.1\nusage: %s [-m mode] [-e errorCorrectionLevel] [-v version] [-w] [-f file] [-s size] [-h] [--] data ...\n"
 			
 			"\n"
-			"[-m mode]         Encoding Mode. Use 'a' for alphanumeric, 'n' for numeric or 'b' for binary encodation.\n"
-			"                  Default: binary\n\n"
-			"[-e ecLevel]      Error Correction Level. Use 'l' for low, 'm' for medium, 'q' for more or 'h' for high.\n"
-			"                  Default: high\n\n"
-			"[-v version]      Version. The specified version must be between and including 1 and 40.\n"
-			"                  If the version is 0, the programm chooses the smallest possible version itself.\n"
-			"                  Default: 0\n\n"
-			"[-w]              Displays the qrcode in a window.\n\n"
-			"[-f file]         Save the qrcode to the specified file.\n"
-			"                  If -f is not set, the programm displays the qrcode in a window.\n"
-			"                  NOTE: Only png and svg are supported.\n\n"
-			"[-s size]         Qrcode Size in Pixels.\n"
-			"                  Default 200.\n\n"
-			"[-h]              Print this help.\n\n"
-			"data              The data to encode.\n", progname);
+			"-m, --mode             Encoding Mode. Use 'a' for alphanumeric, 'n' for numeric or 'b' for binary encodation.\n"
+			"                       Default: binary\n\n"
+			"-e, --eclevel          Error Correction Level. Use 'l' for low, 'm' for medium, 'q' for more or 'h' for high.\n"
+			"                       Default: high\n\n"
+			"-v, --symbol-version   Version. The specified version must be between and including 1 and 40.\n"
+			"                       If the version is 0, the programm chooses the smallest possible version itself.\n"
+			"                       Default: 0\n\n"
+			"-w, --window           Displays the qrcode in a window.\n\n"
+			"-f, --file             Save the qrcode to the specified file.\n"
+			"                       If -f is not set, the programm displays the qrcode in a window.\n"
+			"                       NOTE: Only png and svg are supported.\n\n"
+			"-s, --size             Qrcode Size in Pixels.\n"
+			"                       Default 200.\n\n"
+			"-h, --help             Print this help.\n\n"
+			"--version              Print version number.\n\n"
+			"--                     Ignore all options after this.\n\n"
+			"data                   The data to encode.\n", progname, progname);
 }

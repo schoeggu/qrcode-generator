@@ -17,22 +17,35 @@ Optional:
 Usage (Sample Program)
 ----------------------
 
-	qrgen [-m mode] [-e errorCorrectionLevel] [-v version] [-w] [-f file] [-s size] [-h] data ...
-	[-m mode]		Encoding Mode. Use 'a' for alphanumeric, 'n' for numeric or 'b' for binary encodation.
-					Default: binary
-	[-e ecLevel]	Error Correction Level. Use 'l' for low, 'm' for medium, 'q' for more or 'h' for high.
-					Default: high
-	[-v version]	Version. The specified version must be between and including 1 and 40.
-					If the version is 0, the programm chooses the smallest possible version itself.
-					Default: 0
-	[-w]			Displays the qrcode in a window.
-	[-f file]		Save the qrcode to the specified file.
-					If -f is not set, the programm displays the qrcode in a window.
-					NOTE: Only png and svg are supported.
-	[-s size]		Qrcode Size in Pixels.
-					Default 200.
-	[-h]			Print this help.
-	data			The data to encode.
+	qrgen [-m mode] [-e errorCorrectionLevel] [-v version] [-w] [-f file] [-s size] [-h] [--] data ...
+
+	-m, --mode             Encoding Mode. Use 'a' for alphanumeric, 'n' for numeric or 'b' for binary encodation.
+	                       Default: binary
+
+	-e, --eclevel          Error Correction Level. Use 'l' for low, 'm' for medium, 'q' for more or 'h' for high.
+	                       Default: high
+	
+	-v, --symbol-version   Version. The specified version must be between and including 1 and 40.
+	                       If the version is 0, the programm chooses the smallest possible version itself.
+	                       Default: 0
+	
+	-w, --window           Displays the qrcode in a window.
+	
+	-f, --file             Save the qrcode to the specified file.
+	                       If -f is not set, the programm displays the qrcode in a window.
+	                       NOTE: Only png and svg are supported.
+	
+	-s, --size             Qrcode Size in Pixels.
+	                       Default 200.
+	
+	-h, --help             Print this help.
+	
+	--version              Print version number.
+	
+	--                     Ignore all options after this.
+	
+	data                   The data to encode.
+
 	
 For Example:
 
@@ -111,7 +124,7 @@ Example:
 	
 Will generate this:
 
-![generated_QR_Code](http://img26.imageshack.us/img26/5615/qrgen2.png)
+![generated QR Code](http://img26.imageshack.us/img26/5615/qrgen2.png)
 	
 Building
 --------
@@ -127,7 +140,7 @@ _NOTE:_ There is a directory called *rc*. The programm only works if you call it
 License
 -------
 
-Copyright (C) 2011 Joel Sutter
+Copyright (C) 2011 Joel Sutter (joel.sutter.dev@gmail.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by

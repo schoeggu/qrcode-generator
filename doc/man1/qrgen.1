@@ -1,0 +1,98 @@
+.TH qrgen 1 "February 2011" 
+.SH NAME
+qrgen - a QR Code generator
+.SH SYNOPSIS
+.B qrgen 
+.RB [ \-m
+.IR "mode" ]
+.RB [ \-e 
+.IR "errorCorrectionLevel" ]
+.RB [ \-v 
+.IR "version" ]
+.RB [ \-w ]
+.RB [ \-f
+.IR "filename" ]
+.RB [ \-s
+.IR "size" ]
+.RB [ \-h ]
+.RB [ \-v ]
+.IR  data\  ... 
+
+.SH DESCRIPTION
+.PP
+XX
+.PP
+XX
+
+.SH OPTIONS
+
+.TP
+.BI \-m\  encode_mode ,\ --mode\  encode_mode
+Encoding Mode. Use 
+.I a
+for alphanumeric, 
+.I n
+for numeric or 
+.I b
+for binary encodation.
+Default:
+.IR b .
+ 
+
+.TP
+.BI \-e\  level ,\ --eclevel\  level
+Error Correction Level. Use
+.I l
+(7%) for low,
+.I m
+(15%) for medium
+.I q
+(25%) for more or
+.I h
+(30%) for high. 
+Default:
+.IR h .
+
+
+.TP
+.BI \-v\  version ,\ --symbol-version\  version
+Version. The specified version must be between and including 1 and 40. 
+If the version is 0, the programm chooses the smallest possible version itself.
+Version 1 has a size of 21x21, with every step the size size of a version increases by 4. Version 2 has a size of 25x25, version 3 is 29x29 and version 40 is 144x144.
+Default:
+.IR 0 .
+
+.TP
+.BR \-w ,\  --window
+Displays the qrcode in a window
+
+.TP
+.BR \-f\  file ,\ --file\  file
+Save the qrcode to the specified
+.I file
+.RB If\  -f
+is not set, the programm displays the qrcode in a window.
+NOTE: Only png and svg are supported.
+
+.TP
+.BR \-s\  size ,\ --size\  size
+Size of the qrcode in pixels.
+Default: 200.
+
+.TP
+.BR \--
+Ignore the rest of the labeled arguments following this flag.
+
+.TP
+.B --version
+Display version information and exit.
+.TP
+.BR \-h ,\  --help
+Display usage information and exit.
+
+.SH EXAMPLES
+.SH FILES
+.PP
+.SH BUGS
+.SH AUTHOR
+Joel Sutter (joel.sutter.dev@gmail.com)
