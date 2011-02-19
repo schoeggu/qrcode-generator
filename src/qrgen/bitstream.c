@@ -15,7 +15,7 @@ bitstream* bs_init()
 	bitstream* bs = malloc(sizeof(bitstream));
 	bs->size = 0;
 	bs->buffersize = 4; /*start with 4 bytes*/
-	bs->buffer = calloc(sizeof(byte), bs->buffersize);
+	bs->buffer = calloc(bs->buffersize, sizeof(byte));
 	return bs;
 }
 
@@ -68,8 +68,25 @@ void bs_add_internal(bitstream* bs, byte data, int numBits)
 	/* if nescessary allocate new memory */
 	if (bs->buffersize * 8 < bs->size + numBits) {
 		bs->buffersize++;
-		bs->buffer = realloc(bs->buffer, bs->buffersize);
-		bs->buffer[bs->buffersize-1] &= 0;
+
+
+		/* with realloc an error occurs at some datalengths
+		 * *** glibc detected *** ./qrgen: free(): invalid next size (normal): 0x095a6400 ***
+		 * don't know why, we just use a workaround until we find whats wrong
+		 *
+		 * bs->buffer = realloc(bs->buffer, sizeof(byte)*bs->buffersize);
+		 *
+		 */
+		byte* tmp = calloc(bs->buffersize, sizeof(byte));
+		memcpy(tmp, bs->buffer, bs->buffersize-1);
+		free(bs->buffer);
+		bs->buffer = tmp;
+		tmp = NULL;
+		
+
+
+
+		bs->buffer[bs->buffersize-1] = 0;
 		
 	}
 

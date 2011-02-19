@@ -44,13 +44,13 @@ void initialize_gp()
 
 void destroy_gp()
 {
-	if (gp) {
+	if (gp_initialized && gp) {
 		int i;
 		for (i = 0; i < 68; i++) {
 			free(gp[i]);
 			gp[i] = NULL;
 		}
-		free(gp);
+//		free(gp);
 		gp = NULL;
 	}
 	gp_initialized = false;	

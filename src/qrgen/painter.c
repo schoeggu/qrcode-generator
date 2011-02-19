@@ -14,7 +14,7 @@ int image[] = {
 119872649 // 111001001010001110010001001
 };
 
-int index = 0;
+int idx = 0;
 int bitNum = 7;
 
 void printBitmap(cairo_t* cr, int xx, int yy, int width, int height, int* data)
@@ -236,8 +236,8 @@ int applyMask(int pixel, int x, int y, int mask)
 void drawBit(cairo_t* cr, int version, const byte* data, int x, int y, int mask)
 {
 	if (!intersectsPattern(x, y, version)) {
-		if (bitNum < 0) { bitNum = 7; index++; }
-		if (applyMask((data[index] >> bitNum--), x, y, mask) & 1) {
+		if (bitNum < 0) { bitNum = 7; idx++; }
+		if (applyMask((data[idx] >> bitNum--), x, y, mask) & 1) {
 			cairo_rectangle(cr, x, y, 1, 1);
 		}
 	}
@@ -272,7 +272,7 @@ void paint_qrcode(cairo_t* cr, const SymbolInfo* si, int size)
 {
 	if (!si || !cr) return;
 	
-	index = 0;
+	idx = 0;
 	bitNum = 7;
 
 	int numPixels = getNumPixels(si->version);

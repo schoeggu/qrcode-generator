@@ -18,8 +18,8 @@ bool generateErrorCorrectionCode(const byte* const data, int dataSize, byte* des
 	}
 
 	/* first get de Generator Polinomial */
-	const byte* gp = get_gp(ecBlocks);
-	if (!gp) {
+	const byte* genpoly = get_gp(ecBlocks);
+	if (!genpoly) {
 		fprintf(stderr, "Error: Cannot calculate Error correction, coudn't retreive Generator Polynomial\n");	
 		return false;
 	}
@@ -39,7 +39,7 @@ bool generateErrorCorrectionCode(const byte* const data, int dataSize, byte* des
 		byte add = petoal(errorCorrection[i]); /* alpha value of first dataBlock that is not 0*/
 		int j;
 		for (j = 0; j < ecBlocks+1; j++) {
-			unsigned int alpha = add + gp[j];
+			unsigned int alpha = add + genpoly[j];
 			if (alpha >255U) alpha -= 255U; // alpha mustn't overflow
 			errorCorrection[j+i] = altope(alpha) ^ errorCorrection[j+i];
 		}
