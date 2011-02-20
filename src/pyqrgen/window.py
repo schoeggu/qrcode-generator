@@ -1,47 +1,51 @@
-#! /usr/bin/env python
-import pyqrgen
+#!/usr/bin/env python
 
 import pygtk
 pygtk.require('2.0')
-import gtk, gobject, cairo
+import gtk
+import gobject
+import cairo
+
+import pyqrgen
 
 
-# Create a GTK+ widget on which we will draw using Cairo
 class Screen(gtk.DrawingArea):
+	'''Create a GTK+ widget on which we will draw using Cairo.'''
 
 	surfaceSize = 3000
 
-	__gsignals__ = { "expose-event": "override" }
+	__gsignals__ = {"expose-event": "override"}
 
 	def do_expose_event(self, event):
 
 		cr = self.window.cairo_create()
 
-		cr.rectangle(event.area.x, event.area.y, event.area.width, event.area.height)
+		cr.rectangle(event.area.x, event.area.y, event.area.width,
+				event.area.height)
 		cr.clip()
 
-		scaleW = (event.area.width-20.0)/self.surfaceSize
-		scaleH = (event.area.height-20.0)/self.surfaceSize
+		scaleW = (event.area.width - 20.0) / self.surfaceSize
+		scaleH = (event.area.height - 20.0) / self.surfaceSize
 
 		cr.scale(scaleW, scaleH)
 
-		cr.set_source_surface(self.surface, 10/scaleW, 10/scaleH)
+		cr.set_source_surface(self.surface, 10 / scaleW, 10 / scaleH)
 		cr.paint()
 
 	def generate(self, data):
 		ctx = cairo.Context(self.surface)
 		pyqrgen.generate(data, 0, 4, 2, ctx, self.surfaceSize)
 		self.queue_draw()
-		
 
 	def __init__(self):
 		gtk.DrawingArea.__init__(self)
-		self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.surfaceSize, self.surfaceSize)
+		self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32,
+				self.surfaceSize, self.surfaceSize)
 		self.generate("green pride")
 
 
-
 class Win:
+	'''Create GTK window.'''
 
 	def clicked(self, widget):
 		self.screen.generate(self.entry.get_text())
@@ -81,15 +85,10 @@ class Win:
 		self.window.show()
 
 
-
-
 def run(Widget):
-#	window = Widget
 	widget = Widget()
-#	widget.show()
-#	window.add(widget)
-#	window.present()
 	gtk.main()
+
 
 if __name__ == "__main__":
 	run(Win)
