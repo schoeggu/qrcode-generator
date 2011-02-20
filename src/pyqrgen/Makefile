@@ -5,8 +5,8 @@ LIB = pyqrgen.so
 CFLAGS += -I../../include
 LDFLAGS += -L../qrgen -lqrgen
 
-PKGCONFIGCFLAGS = $(shell pkg-config --cflags cairo python pycairo)
-PKGCONFIGLIBS = $(shell pkg-config --libs cairo python pycairo)
+PKGCONFIGCFLAGS = $(shell pkg-config --cflags cairo pycairo)$(shell python-config --cflags)
+PKGCONFIGLIBS = $(shell pkg-config --libs cairo pycairo)$(shell python-config --cflags)
 
 DEPENDFILE = .depend
 
