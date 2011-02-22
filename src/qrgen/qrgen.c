@@ -1,7 +1,6 @@
 #include "qrgen.h"
 
 #include "ec.h"
-#include "gp.h"
 #include "ap.h"
 #include "symbolinfo.h"
 #include "bitstream.h"
@@ -21,15 +20,12 @@ bool blockwiseErrorCorrection(SymbolInfo* si, bitstream* bs);
 
 void qrgen_init()
 {
-	calculate_galois_field(PP);
-	initialize_gp();
 	si_init_codewords();
 	initialize_ap();
 }
 
 void qrgen_destroy()
 {
-	destroy_gp();
 	si_destroy_codewords();
 	destroy_ap();
 }

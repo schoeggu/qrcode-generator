@@ -1,13 +1,8 @@
 #include "gp.h"
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-byte** gp = 0;
-static bool gp_initialized = false;
-
-static const byte gp_indicator[31][70] = {
+static const byte gp[31][70] = {
 	{ 7, 0,  87, 229, 146, 149, 238, 102,  21,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0},
 	{10, 0, 251,  67,  46,  61, 118,  70,  64,  94,  32,  45,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0},
 	{13, 0,  74, 152, 176, 100,  86, 100, 106, 104, 130, 218, 206, 140,  78,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0},
@@ -41,47 +36,13 @@ static const byte gp_indicator[31][70] = {
 	{68, 0, 247, 159, 223,  33, 224,  93,  77,  70,  90, 160,  32, 254,  43, 150,  84, 101, 190, 205, 133,  52,  60, 202, 165, 220, 203, 151,  93,  84,  15,  84, 253, 173, 160,  89, 227,  52, 199,  97,  95, 231,  52, 177,  41, 125, 137, 241, 166, 225, 118,   2,  54,  32,  82, 215, 175, 198,  43, 238, 235,  27, 101, 184, 127,   3,   5,   8, 163, 238}
 };
 
-void initialize_gp()
-{
-	gp = calloc(68, sizeof(byte*));
-
-	int i, j;
-	for (i = 0; i < 31; i++) {
-
-		/* first number of line is the number of ErrorCorrectionBlocks for the Polynomial */
-		int rNum = gp_indicator[i][0];
-		int num = rNum + 1;
- 
-		/* after that, the alpha^n values are listed */
-		gp[rNum-1] = malloc(rNum+1);
-		for (j = 0; j < num; j++) {
-			gp[rNum-1][j] = gp_indicator[i][j+1];
-		}
-	}
-
-	gp_initialized = true;	
-}	
-
-void destroy_gp()
-{
-	if (gp_initialized && gp) {
-		int i;
-		for (i = 0; i < 68; i++) {
-			free(gp[i]);
-			gp[i] = NULL;
-		}
-//		free(gp);
-		gp = NULL;
-	}
-	gp_initialized = false;	
-}
-
 const byte* get_gp(unsigned int numBlocks)
 {
-	if (!gp_initialized) {
-		initialize_gp();
+	int i;
+	for (i = 0; i < 31; i++) {
+		if (gp[i][0] == numBlocks) {
+			return (gp[i]+1);
+		}
 	}
-	numBlocks--; //array index starts with 0, numBlocks with 1
-	if (numBlocks < 68) return gp[numBlocks];
 	return NULL;
 }
