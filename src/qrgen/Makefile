@@ -11,6 +11,7 @@ SRC =	qrgen.c \
 LIB = libqrgen.so
 
 CFLAGS += -I../../include
+LDFLAGS += -lm
 
 PKGCONFIGCFLAGS = $(shell pkg-config --cflags cairo )
 PKGCONFIGLIBS = $(shell pkg-config --libs cairo )
