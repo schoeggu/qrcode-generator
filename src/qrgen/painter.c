@@ -3,6 +3,7 @@
 
 #include <cairo.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 inline int getNumPixels(int version) { return 21 + 4 * (version - 1); }
 
@@ -233,11 +234,14 @@ int applyMask(int pixel, int x, int y, int mask)
 	}
 }
 
-void drawBit(cairo_t* cr, int version, const byte* data, int x, int y, int mask)
+void drawBit(cairo_t* cr, int version, const byte* data, int dataLen, int x, int y, int mask)
 {
+	 
 	if (!intersectsPattern(x, y, version)) {
 		if (bitNum < 0) { bitNum = 7; idx++; }
-		if (applyMask((data[idx] >> bitNum--), x, y, mask) & 1) {
+		int pixel = 0;
+		if (idx < dataLen) pixel = (data[idx] >> bitNum--);
+		if (applyMask(pixel, x, y, mask) & 1) {
 			cairo_rectangle(cr, x, y, 1, 1);
 		}
 	}
@@ -251,16 +255,24 @@ void drawData(cairo_t* cr, const SymbolInfo* si)
 	cairo_save(cr);
 	cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1);
 	
+	//begin at lower right corner
 	for (x = numPixels-1; x >= 0; x-=2) {
+		
+		//draw two columns upwards
 		for (y = numPixels-1; y >= 0; y--) {
-			drawBit(cr, si->version, si->encodedData, x, y, si->mask);
-			drawBit(cr, si->version, si->encodedData, x-1, y, si->mask);
+			drawBit(cr, si->version, si->encodedData, si->totalCodeWords, x, y, si->mask);
+			drawBit(cr, si->version, si->encodedData, si->totalCodeWords, x-1, y, si->mask);
+			cairo_fill(cr);
 		}
+		
 		x-=2;
-		if (x == 6) x-=1;
+		if (x == 6) x-=1; //column 6  is the vertical timing pattern, skip this column
+		
+		//draw two columns downwards
 		for (y = 0; y <= numPixels-1; y++) {
-			drawBit(cr, si->version, si->encodedData, x, y, si->mask);
-			drawBit(cr, si->version, si->encodedData, x-1, y, si->mask);
+			drawBit(cr, si->version, si->encodedData, si->totalCodeWords, x, y, si->mask);
+			drawBit(cr, si->version, si->encodedData, si->totalCodeWords, x-1, y, si->mask);
+			cairo_fill(cr);
 		}
 	}
 	cairo_fill(cr);
