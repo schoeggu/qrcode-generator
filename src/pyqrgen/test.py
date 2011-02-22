@@ -19,7 +19,7 @@ ctx.set_source_rgb(1, 1, 1)
 ctx.fill()
 
 # autoversion, mode Byte, ecl h
-pyqrgen.generate("green pride", 0, 4, 2, ctx, SIZE)
+pyqrgen.generate("green pride", 0, 4, 2, 3, ctx, SIZE)
 
 
 surface.write_to_png("example.png")

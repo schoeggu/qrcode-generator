@@ -20,8 +20,9 @@ static PyObject* pyqrgen_generate(PyObject *self, PyObject *args)
 	int ecLevel;
 	int pixSize;
 	int dataLen;
+	int mask;
 	
-	if(PyArg_ParseTuple(args, "s|i|i|i|O!|i", &data, &version, &encMode, &ecLevel, Pycairo_CAPI->Context_Type, &pycr, &pixSize)) {
+	if(PyArg_ParseTuple(args, "s|i|i|i|i|O!|i", &data, &version, &encMode, &ecLevel, &mask, Pycairo_CAPI->Context_Type, &pycr, &pixSize)) {
 		
 		printf("data: [%s]\n", data);
 		
@@ -30,6 +31,7 @@ static PyObject* pyqrgen_generate(PyObject *self, PyObject *args)
 		printf("encMode: %d\n", encMode);
 		printf("pixSize: %d\n", pixSize);
 		printf("ecLevel: %d\n", ecLevel);
+		printf("mask:    %d\n", mask);
 		
 		dataLen = strlen(data);
 		
@@ -40,19 +42,10 @@ static PyObject* pyqrgen_generate(PyObject *self, PyObject *args)
 		return NULL;
 	}
 	
-	
-	
 	cairo_t* cr = PycairoContext_GET(pycr);
 	if (!cr) { printf ("cr is NULL\n"); }
 	
-	
-	bool ret = qrgen_generate((byte*)data, dataLen, version, encMode, ecLevel, cr, pixSize);
-
-	if (ret) {
-	printf ("yes\n");
-	} else {
-	printf ("no\n");
-	}
+	bool ret = qrgen_generate((byte*)data, dataLen, version, encMode, ecLevel, mask, cr, pixSize);
 
 	Py_INCREF(Py_None);
 	return Py_None;

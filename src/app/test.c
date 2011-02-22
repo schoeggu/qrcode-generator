@@ -190,7 +190,7 @@ int main(int argc, char** argv)
 	
 	bool ret;
 	cairo_t* cr = cairo_create(surface);
-	ret = qrgen_generate((byte*)data, dataLen, version, mode, ecLevel, cr, size);
+	ret = qrgen_generate((byte*)data, dataLen, version, mode, ecLevel, 3, cr, size);
 	cairo_destroy(cr);
 	
 	qrgen_destroy();

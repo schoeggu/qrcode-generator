@@ -30,7 +30,7 @@ void qrgen_destroy()
 	destroy_ap();
 }
 
-bool qrgen_generate(const byte* data, int dataSize, int version, EncodeModeIndicator mode, ECLevel ecLevel, cairo_t* ctx, int pixSize)
+bool qrgen_generate(const byte* data, int dataSize, int version, EncodeModeIndicator mode, ECLevel ecLevel, int mask, cairo_t* ctx, int pixSize)
 {
 	/* 1. init symbolinfo and check if data is ok */
 	SymbolInfo si;
@@ -55,8 +55,8 @@ bool qrgen_generate(const byte* data, int dataSize, int version, EncodeModeIndic
 
 	/* 4. Mask data */
 	//TODO automaticly choose best mask
-	int mask = 3;
-	si.mask = 3;
+	//int mask = 3;
+	si.mask = mask;
 
 	/* 5. Calculate Format Information */
 	// 5 bit formatinfo: 2 bits ecLevel and 3 bits mask indicator
@@ -155,7 +155,7 @@ bool blockwiseErrorCorrection(SymbolInfo* si, bitstream* bs)
 	}
 
 	if (si->encodedData) free(si->encodedData); 
-	si->encodedData = malloc(si->totalCodeWords);
+	si->encodedData = malloc(si->totalCodeWords * sizeof(byte));
 	memcpy(si->encodedData, finalData, si->totalCodeWords);
 
 
