@@ -28,5 +28,6 @@ struct SymbolInfo;
 
 bool encodeData(bitstream* bs, const SymbolInfo* si);
 int getBitCount(int numChars, EncodeModeIndicator mode);
+int getByteCount(int numChars, EncodeModeIndicator mode);
 
 #endif //DATAENCODER_H

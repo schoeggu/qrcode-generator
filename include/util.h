@@ -12,6 +12,8 @@ typedef unsigned char bool;
 #define false 0
 
 
+#define printarray(A, B) { int q; for (q=0; q < (B); q++) { printf("%d\t", (A)[q]); } printf("\n"); }
+
 /*
  * reverse bit order of a byte
  */

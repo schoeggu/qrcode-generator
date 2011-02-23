@@ -3,10 +3,6 @@ Things Todo:
 - Make the library choose the best optimal mask pattern.
 As for now, it allways chooses mask 3.
 
-- Get rid of the 3 .rc files.
-Now, there are 3 .rc files in the rc folder. We need to make the program find the rc files (for example at /usr/local/share/qrgen or ~/.qrgen),
-or hardcode the data into the sourcecode.
-
 - Better Makefiles
 	- Use Autotools or CMake
 	- Make them work on windows, linux and os x
@@ -24,6 +20,36 @@ or hardcode the data into the sourcecode.
 	- Make it possible to write directly to a file, without supplying a cairo surface.
 	- Make it possible to choose, where on the surface the qrcode is drawn.
 	- Support other graphic libraries than cairo.
+	
+	API:
+	We need to be able to set:
+		- Data
+		- Filename (instead of data array)
+		- Enc Mode
+		- Version
+		- Error Correction Level
+		
+		- cairo context
+		- filename (instead of cairo context)
+		- code size
+		- bit size (instead of code size)
+		- x, y (position on context)
+		- quietZone size
+		- calculate optimalSize?
+		
+	We need functions:
+		- set...()
+		- get...()
+		- getMinVersion(dataLen, mode, eclevel)
+		- getCapacaty(version, mode, eclevel)
+		- getEncodedLen(mode, eclevel)
+		
+		- checkVersion() (autochoose, or check if version is large enough for data/mode/eclevel)
+		- readyForGeneration() (check if all nescessary options have been set. And wheter its ok (checkVersion() ...)
+		- generate()
+		
+		
+	
 
 - Option to add quiet zone
 

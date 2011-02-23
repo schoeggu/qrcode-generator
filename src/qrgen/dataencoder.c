@@ -3,6 +3,7 @@
 #include "util.h"
 
 #include <stdio.h>
+#include <math.h>
 
 bool encodeByte(bitstream* bs, const byte* data, int dataSize);
 bool encodeNumeric(bitstream* bs, const byte* data, int dataSize);
@@ -37,8 +38,8 @@ bool encodeData(bitstream* bs, const SymbolInfo* si)
 		return false;
 	}
 
-	bs_add_b(bs, si->encodeMode, 4);               /* add Mode information*/
-	bs_add_i(bs, si->dataCount, ccbc); 			       /* add Character count information */
+	bs_add_b(bs, si->encodeMode, 4);                          /* add Mode information*/
+	bs_add_i(bs, si->dataCount, ccbc);                        /* add Character count information */
 	bool ret = (*encode)(bs, si->inputData, si->dataCount);   /* add data, mode speicific */
 	if (!ret) return false;
 
@@ -47,14 +48,14 @@ bool encodeData(bitstream* bs, const SymbolInfo* si)
 	int bitsLeft = si->totalCodeWords - bs->size;
 	if (bitsLeft > 0) {
 		int terminatorLen = ((bitsLeft > 4) ? 4 : bitsLeft);
-		bs_add_b(bs, Terminator, terminatorLen);         /* add terminator */
+		bs_add_b(bs, Terminator, terminatorLen);              /* add terminator */
 	}
 
-	if (bs->size % 8) bs_add_b(bs, 0, 8 - (bs->size % 8)); /* fill up remaining bits of last byte */
+	if (bs->size % 8) bs_add_b(bs, 0, 8 - (bs->size % 8));    /* fill up remaining bits of last byte */
 
 	bool b = false;
 	while(bs->size / 8 < si->dataCodeWords) {
-		bs_add_b(bs, Padding[b], 8);
+		bs_add_b(bs, Padding[b], 8);                          /* add padding bytes */
 		b = !b;
 	}
 
@@ -73,6 +74,12 @@ int getBitCount(int numChars, EncodeModeIndicator mode)
 		return 4 + CountByte + 8 * numChars;
 	}
 	return 0;
+}
+
+int getByteCount(int numChars, EncodeModeIndicator mode)
+{
+	int tmp = getBitCount(numChars, mode);
+	return tmp / 8 + ((tmp % 8) ? 1 : 0);
 }
 
 bool encodeByte(bitstream* bs, const byte* data, int dataSize)

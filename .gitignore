@@ -1,0 +1,7 @@
+*.o
+*.exe 
+.depend
+*.so
+*.so.1
+*.a
+*.pyd
