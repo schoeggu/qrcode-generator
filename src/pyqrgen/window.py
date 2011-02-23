@@ -5,8 +5,6 @@ import pygtk
 pygtk.require('2.0')
 import gtk, gobject, cairo
 
-
-# Create a GTK+ widget on which we will draw using Cairo
 class Screen(gtk.DrawingArea):
 
 	surfaceSize = 3000
@@ -39,7 +37,6 @@ class Screen(gtk.DrawingArea):
 		gtk.DrawingArea.__init__(self)
 		self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.surfaceSize, self.surfaceSize)
 
-
 class ExpanderFrame(gtk.Frame):
 	def activated(self, expander):
 		if expander.get_expanded():
@@ -60,7 +57,6 @@ class ExpanderFrame(gtk.Frame):
 		self.add(self.w)
 		self.show_all()
 		widget.hide()
-		
 
 class Win:
 	def get_active_text(self, combobox):
@@ -70,29 +66,34 @@ class Win:
 			return None
 		return model[active][0]
 
-	def clicked(self, widget):
-		e = self.get_active_text(self.ec)
-		ecl = 4
-		if e == "L":
-			ecl= 1
-		elif e == "M":
-			ecl = 0
-		elif e == "Q":
-			ecl = 3
-		elif e == "H":
-			ecl = 2
+	def changed(self, widget):
+	
+		if widget == self.button1:
+			self.generated = True
 		
-		m = self.get_active_text(self.mode)
-		md = 0
-		if m == "Binary":
-			md = 4
-		elif m == "Numeric":
-			md = 1
-		elif m == "Alphanumeric":
-			md = 2
+		if self.generated:
+			e = self.get_active_text(self.ec)
+			ecl = 4
+			if e == "L":
+				ecl= 1
+			elif e == "M":
+				ecl = 0
+			elif e == "Q":
+				ecl = 3
+			elif e == "H":
+				ecl = 2
+		
+			m = self.get_active_text(self.mode)
+			md = 0
+			if m == "Binary":
+				md = 4
+			elif m == "Numeric":
+				md = 1
+			elif m == "Alphanumeric":
+				md = 2
 		
 		
-		self.screen.generate(self.entry.get_text(), (int)(self.verspinner.get_adjustment().get_value()), md, ecl, (int)(self.maskspinner.get_adjustment().get_value()))
+			self.screen.generate(self.entry.get_text(), (int)(self.verspinner.get_adjustment().get_value()), md, ecl, (int)(self.maskspinner.get_adjustment().get_value()))
 		
 	def addDetailsConfs(self):
 		detailstable = gtk.Table(4, 2, False)
@@ -105,6 +106,7 @@ class Win:
 		versadj = gtk.Adjustment(0, 0, 40, 1, 0 ,0)
 		self.verspinner = gtk.SpinButton(versadj, 0.1, 0)
 		self.verspinner.set_numeric(True)
+		self.verspinner.connect("value-changed", self.changed)
 		detailstable.attach(versalign, 0, 1, 0, 1, gtk.FILL, gtk.FILL, 2, 0)
 		detailstable.attach(self.verspinner, 1, 2, 0, 1, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 		
@@ -116,6 +118,7 @@ class Win:
 		self.mode.append_text("Numeric")
 		self.mode.append_text("Alphanumeric")
 		self.mode.set_active(0)
+		self.mode.connect("changed", self.changed)
 		detailstable.attach(modealig, 0, 1, 1, 2, gtk.FILL, gtk.FILL, 2, 0)
 		detailstable.attach(self.mode, 1, 2, 1, 2, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 		
@@ -128,6 +131,7 @@ class Win:
 		self.ec.append_text("Q")
 		self.ec.append_text("H")
 		self.ec.set_active(1)
+		self.ec.connect("changed", self.changed)
 		detailstable.attach(ecalig, 0, 1, 2, 3, gtk.FILL, gtk.FILL, 2, 0)
 		detailstable.attach(self.ec, 1, 2, 2, 3, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 		
@@ -138,6 +142,7 @@ class Win:
 		self.maskspinner = gtk.SpinButton(maskadj, 0.1, 0)
 		self.maskspinner.set_numeric(True)
 		self.maskspinner.set_wrap(True)
+		self.maskspinner.connect("value-changed", self.changed)
 		detailstable.attach(maskalign, 0, 1, 3, 4, gtk.FILL, gtk.FILL, 2, 0)
 		detailstable.attach(self.maskspinner, 1, 2, 3, 4, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 
@@ -146,6 +151,8 @@ class Win:
 		return frame
 	
 	def __init__(self):
+	
+		self.generated = False
 		self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 
 		self.window.set_title("qrgen")
@@ -158,7 +165,7 @@ class Win:
 		self.entry = gtk.Entry()
 		self.entry.set_text("green pride")
 		self.button1 = gtk.Button("Generate")
-		self.button1.connect("clicked", self.clicked)
+		self.button1.connect("clicked", self.changed)
 		self.genbox.pack_start(self.button1, False, False, 0)
 		self.genbox.pack_start(self.entry, True, True, 0)
 
