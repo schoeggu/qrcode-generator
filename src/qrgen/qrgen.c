@@ -12,13 +12,11 @@
 
 void qrgen_init()
 {
-	si_init_codewords();
 	initialize_ap();
 }
 
 void qrgen_destroy()
 {
-	si_destroy_codewords();
 	destroy_ap();
 }
 

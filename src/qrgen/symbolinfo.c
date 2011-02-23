@@ -9,9 +9,6 @@
 #include <string.h>
 
 
-static int cw_initialized = 0;
-codeWords* cw;
-
 bool blockwiseErrorCorrection(SymbolInfo* si, bitstream* bs);
 
 SymbolInfo* si_create(const byte* data, int dataCount)
@@ -56,6 +53,9 @@ void si_destroy(SymbolInfo* si)
 	if (si->encodedData) {
 		free(si->encodedData);
 		si->encodedData = NULL;
+	}
+	if(si->blockInfo.block) {
+		free(si->blockInfo.block);
 	}
 	free(si);
 }
@@ -204,7 +204,6 @@ int get_min_version(int dataCount, int encMode, int ecLevel)
 	dataCount = getByteCount(dataCount, encMode);
 	int i;
 	if (dataCount < 0 || ecLevel < 0 || ecLevel > 3) return 0;
-	if (!cw_initialized) si_init_codewords();
 	for (i = 0; i < 40; i++) {
 		if (get_data_codewords(i+1, ecLevel) >= dataCount) return i+1;
 	}
@@ -224,8 +223,7 @@ bool fits_to_version(int version, int dataCount, int encMode, int ecLevel)
 int get_data_codewords(int version, int ecLevel)
 {
 	if (version > 0 && version < 41 && ecLevel >= 0 && ecLevel < 4) {
-		if (!cw_initialized) si_init_codewords();
-		return cw[version - 1].dataCodeWords[ecLevel];
+		return get_total_codewords(version) - get_ec_codewords(version, ecLevel);
 	}
 	return -1;
 }
@@ -233,8 +231,7 @@ int get_data_codewords(int version, int ecLevel)
 int get_ec_codewords(int version, int ecLevel)
 {
 	if (version > 0 && version < 41 && ecLevel >= 0 && ecLevel < 4) {
-		if (!cw_initialized) si_init_codewords();
-		return cw[version - 1].ecCodeWords[ecLevel];
+		return si_indicator[(version - 1) * 5 + 1 + ecLevel][0];
 	}
 	return 0;
 }
@@ -242,104 +239,49 @@ int get_ec_codewords(int version, int ecLevel)
 int get_total_codewords(int version)
 {
 	if (version > 0 && version < 41) { 
-		if (!cw_initialized) si_init_codewords();
-		return cw[version - 1].totalCodeWords;
+		return si_indicator[(version - 1) * 5][1];
 	}
 	return 0;
 }
 
 BlockInfo get_block_info(int version, int ecLevel)
 {
-	if (!cw_initialized) si_init_codewords();
-	if (version > 0 && version < 41) {
-		return cw[version-1].blocks[ecLevel];
-	}	
-	BlockInfo b;
-	b.numberOfBlocks = 0;
-	b.block = NULL;
-	return b;
-	
-}
+	BlockInfo bi;
+	int versionIndex = (version -1) * 5 + ecLevel + 1;
+	int j = 1;
 
-bool si_init_codewords()
-{
-	cw = calloc(40, sizeof(codeWords));
-
-	int version;
-	for (version = 0; version < 40; version++) {
-		int versionIndex = version * 5;
-
-		int totalCW = si_indicator[versionIndex][1];
-		cw[version].totalCodeWords = totalCW;
-
-		int i;
-		ECLevel l[] = { EC_L, EC_M, EC_Q, EC_H };
-		versionIndex++;
-		for (i = 0; i < 4; i++) {
-			int j = 0;
-			ECLevel ecLevel = l[i];
+	int numFirstBlock = 0;
+	int numSecondBlock = 0;
+	int totalFirstBlock = 0;
+	int totalSecondBlock = 0;
+	int dataFirstBlock = 0;
+	int dataSecondBlock = 0;
 
 
+	numFirstBlock = si_indicator[versionIndex][j++];
+	totalFirstBlock = si_indicator[versionIndex][j++];
+	dataFirstBlock = si_indicator[versionIndex][j++];
+	numSecondBlock = si_indicator[versionIndex][j++];
+	totalSecondBlock = si_indicator[versionIndex][j++];
+	dataSecondBlock = si_indicator[versionIndex][j++];
 
-			int ecCW = si_indicator[versionIndex+i][j++];
+	bi.numberOfBlocks = numFirstBlock + numSecondBlock;
+	bi.block = calloc(numFirstBlock + numSecondBlock, sizeof(Block));
 
-			cw[version].ecCodeWords[ecLevel] = ecCW;
-			cw[version].dataCodeWords[ecLevel] = totalCW - ecCW;
-
-			int numFirstBlock = 0;
-			int numSecondBlock = 0;
-			int totalFirstBlock = 0;
-			int totalSecondBlock = 0;
-			int dataFirstBlock = 0;
-			int dataSecondBlock = 0;
-
-			numFirstBlock = si_indicator[versionIndex+i][j++];
-
-			totalFirstBlock = si_indicator[versionIndex+i][j++];
-
-			dataFirstBlock = si_indicator[versionIndex+i][j++];
-
-			numSecondBlock = si_indicator[versionIndex+i][j++];
-
-			totalSecondBlock = si_indicator[versionIndex+i][j++];
-	
-			dataSecondBlock = si_indicator[versionIndex+i][j++];
-
-			cw[version].blocks[ecLevel].numberOfBlocks = numFirstBlock + numSecondBlock;
-			cw[version].blocks[ecLevel].block = calloc(numFirstBlock + numSecondBlock, sizeof(Block));
-
-			int k;
-			for (k = 0; k < numFirstBlock; k++) {
-				cw[version].blocks[ecLevel].block[k].totalCodeWords = totalFirstBlock;
-				cw[version].blocks[ecLevel].block[k].dataCodeWords = dataFirstBlock;
-				cw[version].blocks[ecLevel].block[k].ecCodeWords = totalFirstBlock - dataFirstBlock;
-			}
-			for (; k < numFirstBlock + numSecondBlock; k++) {
-				cw[version].blocks[ecLevel].block[k].totalCodeWords = totalSecondBlock;
-				cw[version].blocks[ecLevel].block[k].dataCodeWords = dataSecondBlock;
-				cw[version].blocks[ecLevel].block[k].ecCodeWords = totalSecondBlock - dataSecondBlock;
-			}
-		}
+	int k;
+	for (k = 0; k < numFirstBlock; k++) {
+		bi.block[k].totalCodeWords = totalFirstBlock;
+		bi.block[k].dataCodeWords = dataFirstBlock;
+		bi.block[k].ecCodeWords = totalFirstBlock - dataFirstBlock;
+	}
+	for (; k < numFirstBlock + numSecondBlock; k++) {
+		bi.block[k].totalCodeWords = totalSecondBlock;
+		bi.block[k].dataCodeWords = dataSecondBlock;
+		bi.block[k].ecCodeWords = totalSecondBlock - dataSecondBlock;
 	}
 
-	cw_initialized = true;	
-
-	return true;
-}
-
-void si_destroy_codewords()
-{
-	if (cw_initialized) {
-		int i;
-		int j;
-		for (j = 0; j < 40; j++) {
-			for(i = 0; i < 4; i++) {
-				free(cw[j].blocks[i].block);
-			}
-		}
-		free(cw);
-		cw_initialized = false;
-	}
+	return bi;
+	
 }
 
 bool blockwiseErrorCorrection(SymbolInfo* si, bitstream* bs)

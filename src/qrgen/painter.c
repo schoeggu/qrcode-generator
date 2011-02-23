@@ -266,7 +266,6 @@ void drawData(cairo_t* cr, const SymbolInfo* si)
 		for (y = numPixels-1; y >= 0; y--) {
 			drawBit(cr, si->version, si->encodedData, si->totalCodeWords, x, y, si->mask);
 			drawBit(cr, si->version, si->encodedData, si->totalCodeWords, x-1, y, si->mask);
-			cairo_fill(cr);
 		}
 		
 		x-=2;
@@ -276,7 +275,6 @@ void drawData(cairo_t* cr, const SymbolInfo* si)
 		for (y = 0; y <= numPixels-1; y++) {
 			drawBit(cr, si->version, si->encodedData, si->totalCodeWords, x, y, si->mask);
 			drawBit(cr, si->version, si->encodedData, si->totalCodeWords, x-1, y, si->mask);
-			cairo_fill(cr);
 		}
 	}
 	cairo_fill(cr);

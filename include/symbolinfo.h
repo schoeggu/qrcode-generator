@@ -57,15 +57,6 @@ typedef struct {
 
 } SymbolInfo;
 
-typedef struct {
-	int totalCodeWords;	
-	int ecCodeWords[4];
-	int dataCodeWords[4];
-	BlockInfo blocks[4];
-} codeWords;
-
-bool si_init_codewords();
-void si_destroy_codewords();
 
 SymbolInfo* si_create(const byte* data, int dataLen);
 SymbolInfo* si_create_conf(const byte* data, int dataCount, int version, int mode, int level, int mask);
