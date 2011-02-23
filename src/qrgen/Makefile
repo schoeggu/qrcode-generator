@@ -7,6 +7,7 @@ SRC =	qrgen.c \
 		ap.c \
 		util.c \
 		painter.c \
+		paintcontext.c \
 
 LIB = libqrgen.so
 

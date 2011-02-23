@@ -67,7 +67,7 @@ AlignementPatternPosition* create_ap(int version)
 	AlignementPatternPosition* a = calloc(sizeof(AlignementPatternPosition), 1);
 
 	int i;
-	int j;
+	int j = 0;
 
 	int numPosition;
 	int numberAp;
