@@ -45,7 +45,7 @@ static PyObject* pyqrgen_generate(PyObject *self, PyObject *args)
 	cairo_t* cr = PycairoContext_GET(pycr);
 	if (!cr) { printf ("cr is NULL\n"); }
 	
-	bool ret = qrgen_generate((byte*)data, dataLen, version, encMode, ecLevel, mask, cr, pixSize);
+	qrgen_generate((byte*)data, dataLen, version, encMode, ecLevel, mask, cr, pixSize);
 
 	Py_INCREF(Py_None);
 	return Py_None;

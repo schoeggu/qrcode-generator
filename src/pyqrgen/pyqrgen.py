@@ -70,6 +70,7 @@ class Win:
 	
 		if widget == self.button1:
 			self.generated = True
+
 		
 		if self.generated:
 			e = self.get_active_text(self.ec)
@@ -93,7 +94,18 @@ class Win:
 				md = 2
 		
 		
-			self.screen.generate(self.entry.get_text(), (int)(self.verspinner.get_adjustment().get_value()), md, ecl, (int)(self.maskspinner.get_adjustment().get_value()))
+			self.screen.generate(self.entry.get_text(), (int)(self.verspinner.props.value), md, ecl, (int)(self.maskspinner.props.value - 1))
+
+
+	def output(self, widget):
+		if widget == self.verspinner and self.verspinner.props.value == 0:
+			self.verspinner.props.text = "Auto"
+			return True
+
+		if widget == self.maskspinner and self.maskspinner.props.value == 0:
+			self.maskspinner.props.text = "Auto"
+			return True
+
 		
 	def addDetailsConfs(self):
 		detailstable = gtk.Table(4, 2, False)
@@ -105,8 +117,8 @@ class Win:
 		versalign.add(versionlabel)
 		versadj = gtk.Adjustment(0, 0, 40, 1, 0 ,0)
 		self.verspinner = gtk.SpinButton(versadj, 0.1, 0)
-		self.verspinner.set_numeric(True)
 		self.verspinner.connect("value-changed", self.changed)
+		self.verspinner.connect("output", self.output)
 		detailstable.attach(versalign, 0, 1, 0, 1, gtk.FILL, gtk.FILL, 2, 0)
 		detailstable.attach(self.verspinner, 1, 2, 0, 1, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 		
@@ -138,11 +150,11 @@ class Win:
 		masklabel = gtk.Label("Mask")
 		maskalign = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
 		maskalign.add(masklabel)
-		maskadj = gtk.Adjustment(0, 0, 7, 1, 0 ,0)
+		maskadj = gtk.Adjustment(0, 0, 8, 1, 0 ,0)
 		self.maskspinner = gtk.SpinButton(maskadj, 0.1, 0)
-		self.maskspinner.set_numeric(True)
 		self.maskspinner.set_wrap(True)
 		self.maskspinner.connect("value-changed", self.changed)
+		self.maskspinner.connect("output", self.output)
 		detailstable.attach(maskalign, 0, 1, 3, 4, gtk.FILL, gtk.FILL, 2, 0)
 		detailstable.attach(self.maskspinner, 1, 2, 3, 4, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 
