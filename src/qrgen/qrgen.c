@@ -1,24 +1,10 @@
 #include "qrgen.h"
 
-#include "ec.h"
-#include "ap.h"
 #include "symbolinfo.h"
-#include "bitstream.h"
-#include "dataencoder.h"
 #include "painter.h"
 
 #include <stdio.h>
 #include <string.h>
-
-void qrgen_init()
-{
-	initialize_ap();
-}
-
-void qrgen_destroy()
-{
-	destroy_ap();
-}
 
 bool qrgen_generate(const byte* data, int dataSize, int version, EncodeModeIndicator mode, ECLevel ecLevel, int mask, cairo_t* ctx, int pixSize)
 {

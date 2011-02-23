@@ -160,7 +160,6 @@ int main(int argc, char** argv)
 	
 	surface = cairo_recording_surface_create(CAIRO_CONTENT_COLOR_ALPHA, &rect);
 	
-	qrgen_init();
 	
 	char* data;
 	int dataLen = 0;
@@ -192,8 +191,6 @@ int main(int argc, char** argv)
 	cairo_t* cr = cairo_create(surface);
 	ret = qrgen_generate((byte*)data, dataLen, version, mode, ecLevel, 3, cr, size);
 	cairo_destroy(cr);
-	
-	qrgen_destroy();
 	
 	if (ret) {
 		printf(" generated\n");

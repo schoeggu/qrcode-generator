@@ -14,10 +14,8 @@ typedef struct {
 	point* position;
 } AlignementPatternPosition;
 
-void initialize_ap();
+AlignementPatternPosition* create_ap(int version);
 
 void destroy_ap();
-
-const AlignementPatternPosition* getAp(int verion);
 
 #endif //AP_H

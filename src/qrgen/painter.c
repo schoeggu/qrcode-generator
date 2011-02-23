@@ -56,13 +56,15 @@ bool intersectsPattern(int x, int y, int version)
 	
 	//alignement pattern
 	int i;
-	const AlignementPatternPosition* ap = getAp(version);
+	AlignementPatternPosition* ap = create_ap(version);
 	
 	for (i = 0; i < ap->numberOfPatterns; i++) {
 		int apX = ap->position[i].x;
 		int apY = ap->position[i].y;
 		if (x > apX - 3 && x < apX + 3 && y > apY - 3 && y < apY + 3) return true;
 	}
+
+	destroy_ap(ap);
 
 	//time pattern
 	if (x == 6 || y == 6) return true;
@@ -305,12 +307,14 @@ void paint_qrcode(cairo_t* cr, const SymbolInfo* si, int size)
 
 	drawTimingPattern(cr, si->version);
 
-	const AlignementPatternPosition* ap = getAp(si->version);
+	AlignementPatternPosition* ap = create_ap(si->version);
 
 	int i;
 	for (i = 0; i < ap->numberOfPatterns; i++) {
 		drawAlignmentPattern(cr, ap->position[i].x, ap->position[i].y);
 	}
+
+	destroy_ap(ap);
 	
 	drawData(cr, si);
 
