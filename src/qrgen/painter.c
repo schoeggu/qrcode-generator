@@ -179,6 +179,10 @@ void drawFormatInformation(cairo_t* cr, int version, int formatInfo)
 		}
 		formatInfo >>= 1;
 	}
+
+	/* print Black Module above lower left Version Info */
+	cairo_rectangle(cr, 8, numPixels - 8, 1, 1);
+
 	cairo_fill(cr);
 	cairo_restore(cr);
 }
