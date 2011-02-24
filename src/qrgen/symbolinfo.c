@@ -24,6 +24,7 @@ SymbolInfo* si_create(const byte* data, int dataCount)
 
 	si->ecLevel = EC_M;
 
+	si->inputData = malloc(dataCount);
 	memcpy(si->inputData, data, dataCount);
 	si->dataCount = dataCount;
 		
@@ -54,8 +55,8 @@ void si_destroy(SymbolInfo* si)
 		free(si->encodedData);
 		si->encodedData = NULL;
 	}
-	if (si->data) {
-		free(si->data);
+	if (si->inputData) {
+		free(si->inputData);
 	}
 	if(si->blockInfo.block) {
 		free(si->blockInfo.block);
@@ -97,9 +98,8 @@ bool si_set_data(SymbolInfo* si, const byte* data, int dataCount)
 		return false;
 	}
 	
-	printf("DATA: %s . %d\n", data, dataCount);
-	
 	if (si->inputData) free(si->inputData);
+	si->inputData = malloc(dataCount);
 	memcpy(si->inputData, data, dataCount);
 	si->dataCount = dataCount;
 

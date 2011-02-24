@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 static Pycairo_CAPI_t *Pycairo_CAPI;
 
@@ -36,7 +37,7 @@ static PyObject* pyqrgen_set_data(PyObject* self, PyObject* args)
 	int len;
 	char* data;
 	if (PyArg_ParseTuple(args, "s|i", &data, &len)) {
-		return PyBool_FromLong(si_set_data(si, data, len));
+		return PyBool_FromLong(si_set_data(si, (byte*)data, len));
 	}
 	Py_RETURN_FALSE;
 }
@@ -162,7 +163,7 @@ static PyObject* pyqrgen_set_foreground(PyObject* self, PyObject* args)
 {
 	double r,g,b,a;
 	if (PyArg_ParseTuple(args, "d|d|d|d", &r, &g, &b, &a)) {
-		color c = {r, g, b, a};
+		color c = {r / USHRT_MAX, g / USHRT_MAX, b / USHRT_MAX, a / USHRT_MAX};
 		return PyBool_FromLong(pc_set_foreground_color(pc, c));
 	}
 	Py_RETURN_FALSE;
@@ -172,7 +173,7 @@ static PyObject* pyqrgen_set_background(PyObject* self, PyObject* args)
 {
 	double r,g,b,a;
 	if (PyArg_ParseTuple(args, "d|d|d|d", &r, &g, &b, &a)) {
-		color c = {r, g, b, a};
+		color c = {r / USHRT_MAX, g / USHRT_MAX, b / USHRT_MAX, a / USHRT_MAX};
 		return PyBool_FromLong(pc_set_background_color(pc, c));
 	}
 	Py_RETURN_FALSE;
@@ -216,61 +217,10 @@ static PyObject* pyqrgen_enable_dont_draw_data(PyObject* self, PyObject* args)
 
 static PyObject* pyqrgen_paint(PyObject* self, PyObject* args)
 {
-	PycairoContext* pycr;
-	if(PyArg_ParseTuple(args, "O!", Pycairo_CAPI->Context_Type, &pycr)) {
-		cairo_t* cr = PycairoContext_GET(pycr);
-		pc_set_cairo_context(pc, cr);
-		paint_qrcode(si, pc);
-		pc_set_cairo_context(pc, NULL);
-		
-	}
+	paint_qrcode(si, pc);
 	Py_INCREF(Py_None);
 	return Py_None;
 }
-
-
-/*static PyObject* pyqrgen_generate(PyObject *self, PyObject *args)
-{
-	
-	PycairoContext* pycr;
-	char* data;
-	int version;
-	int encMode;
-	int ecLevel;
-	int pixSize;
-	int dataLen;
-	int mask;
-	
-	if(PyArg_ParseTuple(args, "s|i|i|i|i|O!|i", &data, &version, &encMode, &ecLevel, &mask, Pycairo_CAPI->Context_Type, &pycr, &pixSize)) {
-		
-		printf("data: [%s]\n", data);
-		
-		printf("version: %d\n", version);
-		
-		printf("encMode: %d\n", encMode);
-		printf("pixSize: %d\n", pixSize);
-		printf("ecLevel: %d\n", ecLevel);
-		printf("mask:    %d\n", mask);
-		
-		dataLen = strlen(data);
-		
-		printf("dataLen: %d\n", dataLen);
-
-	} else {
-		printf("not ok\n");
-		return NULL;
-	}
-	
-	cairo_t* cr = PycairoContext_GET(pycr);
-	if (!cr) { printf ("cr is NULL\n"); }
-	
-	qrgen_generate((byte*)data, dataLen, version, encMode, ecLevel, mask, cr, pixSize);
-
-	Py_INCREF(Py_None);
-	return Py_None;
-
-}
-*/
 
 static PyMethodDef QrgenMethods[] = {
 	
@@ -301,7 +251,7 @@ static PyMethodDef QrgenMethods[] = {
 	{"dontDrawData", pyqrgen_enable_dont_draw_data, METH_VARARGS, "Don't draw any data."},	
 	
 	{"paint", pyqrgen_paint, METH_VARARGS, "Paint the symbol."},	
-	
+
 	{NULL, NULL, 0, NULL}
 };
 
@@ -309,17 +259,16 @@ static PyMethodDef QrgenMethods[] = {
 
 PyMODINIT_FUNC initpyqrgen(void)
 {
-	PyObject* m;
-	
-	si = si_create("a", 1);
-	si_set_version(si, VERSION_AUTO);
-	pc = pc_create(NULL);
+		PyObject* m;
 
-	m = Py_InitModule("pyqrgen", QrgenMethods);
-	if (m == NULL) return;
+		si = si_create((byte*)"a", 1);
+		si_set_version(si, VERSION_AUTO);
+		pc = pc_create(NULL);
 
-	Pycairo_IMPORT;
+		m = Py_InitModule("pyqrgen", QrgenMethods);
+		if (m == NULL) return;
 
+		Pycairo_IMPORT;
 }
 
 
