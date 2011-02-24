@@ -8,25 +8,35 @@ import gtk, gobject, cairo
 class Screen(gtk.DrawingArea):
 
 	
+	surfaceSize = 3000
 
 	__gsignals__ = { "expose-event": "override" }
 
 	def do_expose_event(self, event):
-		if self.generated:
-			window = self.window
-			cr = window.cairo_create()
-			
-			pyqrgen.setSize(event.area.width, event.area.height)
-			pyqrgen.paint(cr)
+		cr = self.window.cairo_create()
+
+		cr.rectangle(event.area.x, event.area.y, event.area.width, event.area.height)
+		cr.clip()
+
+		scaleW = float(event.area.width)/self.surfaceSize
+		scaleH = float(event.area.height)/self.surfaceSize
+		
+
+		cr.scale(scaleW, scaleH)
+
+		cr.set_source_surface(self.surface,  0, 0)
+		cr.paint()
 	
 	def redraw(self):
-		self.generated = True
+		pyqrgen.paint()
 		self.queue_draw()
-		
 
 	def __init__(self):
 		gtk.DrawingArea.__init__(self)
-		self.generated = False
+		self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.surfaceSize, self.surfaceSize)
+		self.ctx = cairo.Context(self.surface)
+		pyqrgen.setCairoContext(self.ctx)
+		pyqrgen.setSize(self.surfaceSize, 0)
 
 class ExpanderFrame(gtk.Frame):
 	def activated(self, expander):
@@ -58,30 +68,38 @@ class Win:
 		return model[active][0]
 		
 	def redraw_qr(self):
-		self.screen.redraw()
+		if self.generated:
+			self.screen.redraw()
 	
 	def regen_qr(self):
-		print("hello")
 		pyqrgen.encode()
 		self.redraw_qr()
 	
 	
 	def pcchanged(self, widget):
 		if widget == self.maskspinner:
-			print("hello")
-			pyqrgen.setMask(self.maskspinner.props.value)
+			pyqrgen.setMask(int(self.maskspinner.props.value)-1)
 			
 		elif widget == self.quietbutton:
-			print("hello")
 			pyqrgen.drawQuietZone(self.quietbutton.props.active)
 			
 		elif widget == self.forebutton:
-			print("hello")
-			pyqrgen.setForegroundColor(self.forebutton.props.color.red, self.forebutton.props.color.green, self.forebutton.props.color.blue, 1)
+			pyqrgen.setForegroundColor(self.forebutton.props.color.red, self.forebutton.props.color.green, self.forebutton.props.color.blue, self.forebutton.props.alpha)
 			
 		elif widget == self.backbutton:
-			print("hello")
-			pyqrgen.setBackgroundColor(self.backbutton.props.color.red, self.backbutton.props.color.green, self.backbutton.props.color.blue, 1)
+			pyqrgen.setBackgroundColor(self.backbutton.props.color.red, self.backbutton.props.color.green, self.backbutton.props.color.blue, self.backbutton.props.alpha)
+
+		elif widget == self.endebugbutton:
+			pyqrgen.enableDebugOptions(self.endebugbutton.props.active)
+
+		elif widget == self.nomaskbutton:
+			pyqrgen.dontMask(self.nomaskbutton.props.active)
+		
+		elif widget == self.nodatabutton:
+			pyqrgen.dontDrawData(self.nodatabutton.props.active)
+		
+		elif widget == self.drawrasterbutton:
+			pyqrgen.drawRaster(self.drawrasterbutton.props.active)
 		
 		
 		self.redraw_qr()
@@ -90,11 +108,11 @@ class Win:
 
 		if widget == self.button1:
 			pyqrgen.setData(self.entry.get_text(), len(self.entry.get_text()))
+			self.generated = True
 
 			
 		elif widget == self.verspinner:
-			print("hello")
-			pyqrgen.setVersion(self.verspinner.props.value)
+			pyqrgen.setVersion(int(self.verspinner.props.value))
 			
 		elif widget == self.ec:
 			e = self.get_active_text(self.ec)
@@ -169,7 +187,7 @@ class Win:
 		backgroundlabel = gtk.Label("Background")
 		backalign = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
 		backalign.add(backgroundlabel)
-		self.backbutton = gtk.ColorButton(gtk.gdk.Color(1,1,1))
+		self.backbutton = gtk.ColorButton(gtk.gdk.Color(-1,-1,-1)) # -1 overflows to uint_max
 		self.backbutton.set_use_alpha(True)
 		self.backbutton.connect("color-set", self.pcchanged)
 		detailstable.attach(backalign, 0, 1, 3, 4, gtk.FILL, gtk.FILL, 2, 0)
@@ -179,6 +197,48 @@ class Win:
 		
 		return frame
 	
+	def getDebugPane(self):
+		detailstable = gtk.Table(4, 2, False)
+		detailstable.set_row_spacings(2)
+		detailstable.set_col_spacings(2)
+
+		endebuglabel = gtk.Label("Enable Debug Options")
+		endebugalign = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		endebugalign.add(endebuglabel)
+		self.endebugbutton = gtk.CheckButton(None, False)
+		self.endebugbutton.connect("toggled", self.pcchanged)
+		detailstable.attach(endebugalign, 0, 1, 0, 1, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(self.endebugbutton, 1, 2, 0, 1, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+
+		nomasklabel = gtk.Label("Don't mask")
+		nomaskalign = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		nomaskalign.add(nomasklabel)
+		self.nomaskbutton = gtk.CheckButton(None, False)
+		self.nomaskbutton.connect("toggled", self.pcchanged)
+		detailstable.attach(nomaskalign, 0, 1, 1, 2, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(self.nomaskbutton, 1, 2, 1, 2, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+	
+		nodatalabel = gtk.Label("Don't paint data")
+		nodataalign = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		nodataalign.add(nodatalabel)
+		self.nodatabutton = gtk.CheckButton(None, False)
+		self.nodatabutton.connect("toggled", self.pcchanged)
+		detailstable.attach(nodataalign, 0, 1, 2, 3, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(self.nodatabutton, 1, 2, 2, 3, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+
+		drawrasterlabel = gtk.Label("Draw raster")
+		drawrasteralign = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		drawrasteralign.add(drawrasterlabel)
+		self.drawrasterbutton = gtk.CheckButton(None, False)
+		self.drawrasterbutton.connect("toggled", self.pcchanged)
+		detailstable.attach(drawrasteralign, 0, 1, 3, 4, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(self.drawrasterbutton, 1, 2, 3, 4, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+	
+	
+		frame = ExpanderFrame(detailstable, "Debug Settings")
+		
+		return frame
+
 		
 	def getOptionPane(self):
 		detailstable = gtk.Table(3, 2, False)
@@ -191,7 +251,7 @@ class Win:
 		versadj = gtk.Adjustment(0, 0, 40, 1, 0 ,0)
 		self.verspinner = gtk.SpinButton(versadj, 0.1, 0)
 		self.verspinner.connect("value-changed", self.sichanged)
-		#self.verspinner.connect("output", self.output)
+		self.verspinner.connect("output", self.output)
 		detailstable.attach(versalign, 0, 1, 0, 1, gtk.FILL, gtk.FILL, 2, 0)
 		detailstable.attach(self.verspinner, 1, 2, 0, 1, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 		
@@ -225,6 +285,7 @@ class Win:
 		return frame
 	
 	def __init__(self):
+		self.generated = False
 
 		self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 
@@ -235,7 +296,7 @@ class Win:
 		
 		self.options = self.getOptionPane()
 		self.advanced = self.getAdvancedPane()
-		#self.debug = getDebugPane()
+		self.debug = self.getDebugPane()
 		
 		
 		self.genbox = gtk.HBox(False, 0)
@@ -253,7 +314,7 @@ class Win:
 		self.mainbox.pack_start(self.genbox, False, False, 0)
 		self.mainbox.pack_start(self.options, False, False, 0)
 		self.mainbox.pack_start(self.advanced, False, False, 0)
-		#self.mainbo0x.pack_start(self.debug, False, False, 0)
+		self.mainbox.pack_start(self.debug, False, False, 0)
 		self.mainbox.pack_start(self.aframe, True, True, 0)
 
 		self.window.add(self.mainbox)

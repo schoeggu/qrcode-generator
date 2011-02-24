@@ -70,7 +70,7 @@ bool si_set_version(SymbolInfo* si, int version)
 		error("Specified version not in range: %d", version);
 		return false; 
 	}
-	if (!fits_to_version(version, si->dataCount, si->encodeMode, si->ecLevel)) {
+	if (!fits_to_version(si->autoVersion ? 40 : version, si->dataCount, si->encodeMode, si->ecLevel)) {
 		error("Cannot set version. Version has not enough data capacity. Minimal required version: %d", get_min_version(si->dataCount, si->encodeMode, si->ecLevel));
 		return false;
 	}
@@ -93,7 +93,7 @@ bool si_set_data(SymbolInfo* si, const byte* data, int dataCount)
 		return false;
 	}
 	
-	if (!fits_to_version(si->version, dataCount, si->encodeMode, si->ecLevel)) {
+	if (!fits_to_version(si->autoVersion ? 40 :si->version, dataCount, si->encodeMode, si->ecLevel)) {
 		error("Data does not fit to new version. Minimal required version: %d", get_min_version(dataCount, si->encodeMode, si->ecLevel));
 		return false;
 	}
@@ -113,7 +113,7 @@ bool si_set_mode(SymbolInfo* si, int mode)
 		return false;
 	}
 	
-	if (!fits_to_version(si->version, si->dataCount, mode, si->ecLevel)) {
+	if (!fits_to_version(si->autoVersion ? 40 : si->version, si->dataCount, mode, si->ecLevel)) {
 		error("Data does not fit to version with new encode mode. Minimal required version: %d", get_min_version(si->dataCount, mode, si->ecLevel));
 		return false;
 	}
@@ -129,7 +129,7 @@ bool si_set_eclevel(SymbolInfo* si, int level)
 		return false;
 	}
 	
-	if (!fits_to_version(si->version, si->dataCount, si->encodeMode, level)) {
+	if (!fits_to_version(si->autoVersion ? 40 : si->version, si->dataCount, si->encodeMode, level)) {
 		error("Data does not fit to version with new error correction level. Minimal required version: %d", get_min_version(si->dataCount, si->encodeMode, level));
 		return false;
 	}
@@ -146,8 +146,9 @@ bool si_set_mask(SymbolInfo* si, int mask)
 		return false;
 	}
 	
-	si->mask = mask;
 	si->automask = (mask == MASK_AUTO);
+	si->mask = mask;
+	if (si->automask) si->mask = 3; /* temporary until solved better */
 	return true;
 }
 
@@ -158,7 +159,7 @@ void si_set_auto_mask(SymbolInfo* si)
 
 bool si_encode(SymbolInfo* si)
 {
-	/* 1. get autoversion, dataCodewords and blockinfo */
+	/* 1. get autoVersion, dataCodewords and blockinfo */
 	if (si->autoVersion) si->version = get_min_version(si->dataCount, si->encodeMode, si->ecLevel);
 	si->totalCodeWords = get_total_codewords(si->version);
 	si->ecCodeWords = get_ec_codewords(si->version, si->ecLevel);

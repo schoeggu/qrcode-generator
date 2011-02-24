@@ -335,8 +335,8 @@ void drawBit(const PaintContext* pc, int version, const byte* data, int dataLen,
 	if (!intersectsPattern(x, y, version)) {
 		if (bitNum < 0) { bitNum = 7; idx++; }
 		int pixel = 0;
-		if (idx < dataLen && !pc->noData) pixel = (data[idx] >> bitNum--);
-		if (applyMask(pixel, x, y, pc->noMask ? MASK_NONE : mask) & 1) {
+		if (idx < dataLen && (!(pc->debug && pc->noData))) pixel = (data[idx] >> bitNum--);
+		if (applyMask(pixel, x, y, (pc->debug && pc->noMask) ? MASK_NONE : mask) & 1) {
 			cairo_rectangle(pc->cr, x, y, 1, 1);
 		}
 	}
