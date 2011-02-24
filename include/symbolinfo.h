@@ -37,7 +37,7 @@ typedef struct {
 
 	ECLevel ecLevel;				/* Error Correction Level: L, M, Q or H */
 
-	const byte* inputData;			/* Pointer to the data */
+	byte* inputData;			    /* Pointer to the data */
 	byte* encodedData;   			/* Pointer to the final data set */
 	int dataCount;					/* Count of how many data elements */
 	int encodedDataCount;           /* Number of bytes after encoding */
@@ -64,14 +64,14 @@ SymbolInfo* si_create_conf(const byte* data, int dataCount, int version, int mod
 void si_destroy(SymbolInfo* si);
 
 bool si_set_version(SymbolInfo* si, int version);
-bool si_set_autoversion(SymbolInfo* si);
+bool si_set_auto_version(SymbolInfo* si);
 
 bool si_set_data(SymbolInfo* si, const byte* data, int dataCount);
 bool si_set_mode(SymbolInfo* si, int mode);
 bool si_set_eclevel(SymbolInfo* si, int level);
 
 bool si_set_mask(SymbolInfo* si, int mask);
-void si_set_automask(SymbolInfo* si);
+void si_set_auto_mask(SymbolInfo* si);
 
 bool si_encode(SymbolInfo* si);
 

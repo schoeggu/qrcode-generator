@@ -50,7 +50,7 @@ static const int positionIndicator[40][9] = {
 };
 
 
-void destroy_ap(AlignementPatternPosition* a)
+void ap_destroy(AlignementPatternPosition* a)
 {
 	if (a) {
 		if (a->position) free(a->position);
@@ -59,7 +59,7 @@ void destroy_ap(AlignementPatternPosition* a)
 	a = NULL;
 }
 
-AlignementPatternPosition* create_ap(int version)
+AlignementPatternPosition* ap_create(int version)
 {
 
 	if (version < 1 && version > 40) return NULL;

@@ -11,8 +11,13 @@ bool qrgen_generate(const byte* data, int dataSize, int version, EncodeModeIndic
 	SymbolInfo* si = si_create_conf(data, dataSize, version, mode, ecLevel, mask);
 	if (!si) return false;
 	if (si_encode(si)) {
-		/* 7. draw QrCode */
-		paint_qrcode(ctx, si, pixSize);
+		/* 7. draw QrCode */		
+		PaintContext* pc = pc_create(ctx);
+		pc_set_size(pc, pixSize, false);
+		pc_set_quiet_zone_size(pc, 1);
+
+		
+		paint_qrcode(si, pc);
 	
 
 		/*** TMP ***/

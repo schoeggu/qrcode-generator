@@ -24,7 +24,7 @@ SymbolInfo* si_create(const byte* data, int dataCount)
 
 	si->ecLevel = EC_M;
 
-	si->inputData = data;
+	memcpy(si->inputData, data, dataCount);
 	si->dataCount = dataCount;
 		
 	si->encodeMode = ModeByte;
@@ -54,6 +54,9 @@ void si_destroy(SymbolInfo* si)
 		free(si->encodedData);
 		si->encodedData = NULL;
 	}
+	if (si->data) {
+		free(si->data);
+	}
 	if(si->blockInfo.block) {
 		free(si->blockInfo.block);
 	}
@@ -77,7 +80,7 @@ bool si_set_version(SymbolInfo* si, int version)
 	return true;
 }
 
-bool si_set_autoversion(SymbolInfo* si)
+bool si_set_auto_version(SymbolInfo* si)
 {
 	return si_set_version(si, VERSION_AUTO);
 }
@@ -93,8 +96,11 @@ bool si_set_data(SymbolInfo* si, const byte* data, int dataCount)
 		error("Data does not fit to new version. Minimal required version: %d", get_min_version(dataCount, si->encodeMode, si->ecLevel));
 		return false;
 	}
-
-	si->inputData = data;
+	
+	printf("DATA: %s . %d\n", data, dataCount);
+	
+	if (si->inputData) free(si->inputData);
+	memcpy(si->inputData, data, dataCount);
 	si->dataCount = dataCount;
 
 	return true;
@@ -145,7 +151,7 @@ bool si_set_mask(SymbolInfo* si, int mask)
 	return true;
 }
 
-void si_set_automask(SymbolInfo* si)
+void si_set_auto_mask(SymbolInfo* si)
 {
 	si_set_mask(si, MASK_AUTO);
 }

@@ -16,7 +16,7 @@ typedef unsigned char bool;
 
 #define error(format, args...)  \
 	{fprintf(stderr, "%s:%d: Error: ", __FILE__, __LINE__); \
-     fprintf(stderr, format , ## args); \
+     fprintf(stderr, (format) , ## args); \
 	 fprintf(stderr, "\n");}
 
 /*

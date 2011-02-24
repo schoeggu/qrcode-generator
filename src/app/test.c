@@ -1,14 +1,13 @@
-#include "qrgen.h"
-#include "window.h"
+#include "symbolinfo.h"
+#include "paintcontext.h"
+#include "painter.h"
+//#include "window.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <getopt.h>
-
-#include <cairo.h>
-#include <cairo-svg.h> 
 
 
 void printHelp(char* progname);
@@ -22,10 +21,15 @@ int main(int argc, char** argv)
 	bool displayWindow = false;
 	bool writeToFile = false;
 	char* filename = NULL;
-	char filetype[4];
 	int size = 200;
+	bool modulsize = false;
 	int displaySize = 200;
 	int len;
+	int quietzone = 0;
+	bool nomask = false;
+	bool nodata = false;
+	bool optimalsize = false;
+	int mask = MASK_AUTO;
 	
 	struct option options[] = { 
 		{"mode", 1, NULL, 'm'},
@@ -34,6 +38,12 @@ int main(int argc, char** argv)
 		{"window", 0, NULL, 'w'},
 		{"file", 1, NULL, 'f'},
 		{"size", 1, NULL, 's'},
+		{"modul-size", 1, NULL, 'n'},
+		{"mask", 1, NULL, 'z'},
+		{"no-mask", 0, NULL, 'a'},
+		{"no-data", 0, NULL, 'd'},
+		{"quiet-zone", 2, NULL, 'q'},
+		{"optimal-size", 2, NULL, 'o'},
 		{"help", 0, NULL, 'h'},
 		{"version", 0, NULL, 'x'},
 		{0, 0, 0, 0}
@@ -41,7 +51,7 @@ int main(int argc, char** argv)
 	
 	int opt;
 	int idx;
-    while ((opt = getopt_long(argc, argv, "m:e:v:wf:s:hx", options, &idx)) != -1) {
+    while ((opt = getopt_long(argc, argv, "m:e:v:wq::f:s:on:hx", options, &idx)) != -1) {
         switch (opt) {
 		
         case 'm':
@@ -96,6 +106,18 @@ int main(int argc, char** argv)
 			}
         break;
 		
+		case 'a':
+			nomask = true;
+		break;
+		
+		case 'd':
+			nodata = true;
+		break;
+		
+		case 'o':
+			optimalsize = true;
+		break;
+		
         case 'w':
             displayWindow = true;
         break;
@@ -112,21 +134,30 @@ int main(int argc, char** argv)
 			filename = calloc(len, sizeof(char));
 			strcpy(filename, optarg);
 			
-			strcpy(filetype, (filename+len-3));
-			printf("%s\n", filetype);
-			
-			if (strcmp(filetype, "svg") && strcmp(filetype, "png")) {
-				fprintf(stderr, "Error: Filetype unsupported '%s'", filetype);
-				return 0;
-			}
-			
 		break;
 		
+		case 'n':
+			modulsize = true;
 		case 's':
 			size = atoi(optarg);
 			displaySize = size;
 			if (size < 0) {
 				fprintf(stderr, "Error: invalid size '%s'", optarg);
+				return 0;
+			}
+		break;
+		
+		case 'q':
+			quietzone = 4;
+			if (optarg) {
+				quietzone = atoi(optarg);
+			}
+		break;
+		
+		case 'z':
+			mask = atoi(optarg);
+			if (mask < 0 || mask > 7) {
+				fprintf(stderr, "Error: invalid mask '%s'", optarg);
 				return 0;
 			}
 		break;
@@ -154,13 +185,6 @@ int main(int argc, char** argv)
 		size = 3000; // large size, so it keeps sharp when resizing the window
 	}
 	
-	cairo_surface_t* surface;
-	cairo_rectangle_t rect = {0, 0, size, size};
-
-	
-	surface = cairo_recording_surface_create(CAIRO_CONTENT_COLOR_ALPHA, &rect);
-	
-	
 	char* data;
 	int dataLen = 0;
 	int i;
@@ -184,44 +208,29 @@ int main(int argc, char** argv)
 	
 	data[strlen(data)-1] = '\0'; // remove last ' '
 	
-	
-	printf("data: [%s], len[%d]\n", data, dataLen);
-	
-	bool ret;
-	cairo_t* cr = cairo_create(surface);
-	ret = qrgen_generate((byte*)data, dataLen, version, mode, ecLevel, 3, cr, size);
-	cairo_destroy(cr);
-	
-	if (ret) {
-		printf(" generated\n");
-		if (writeToFile) {
-			cairo_surface_t* sur;
-			if (!strcmp(filetype, "png")) {
-				sur = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, displaySize, displaySize);
-			} else if (!strcmp(filetype, "svg")) {
-				sur = cairo_svg_surface_create(filename, displaySize, displaySize);
-			} else { return 0; }
-			
-			cairo_t* cr = cairo_create(sur);
-			cairo_scale(cr, ((float)displaySize)/size, ((float)displaySize)/size);
-			cairo_set_source_surface(cr, surface, 0, 0);
-			cairo_paint(cr);
-			
-			if (!strcmp(filetype, "png")) {
-				cairo_surface_write_to_png(sur, filename);
-			}
-			cairo_destroy(cr);
-			cairo_surface_destroy(sur);
-		}
-		
-		if (displayWindow) {
-			displayInWindow(surface, size, displaySize, displaySize, argc, argv);
-		}
-	} else {
-		printf("not generated\n");
+	SymbolInfo* si = si_create_conf((byte*)data, dataLen, version, mode, ecLevel, mask);
+	if (!si) return 0;
+	if (!si_encode(si)) {
+		si_destroy(si);
+		fprintf(stderr, "Error: did not encode\n");
+		return 0;
 	}
-			
-	cairo_surface_destroy(surface);
+	
+	PaintContext* pc = pc_create_for_file(filename);
+	pc_set_size(pc, size, modulsize);
+	if (optimalsize) pc_calculate_optimal_size(pc, true);
+	if (quietzone) pc_set_quiet_zone_size(pc, quietzone);
+	
+	pc_set_foreground_color(pc, WHITE);
+	pc_set_background_color(pc, BLACK);
+	
+	pc_enable_debug_options(pc, nomask | nodata);
+	pc_set_dont_mask(pc, nomask);
+	pc_set_draw_no_data(pc, nodata);
+	
+	paint_qrcode(si, pc);
+	
+	si_destroy(si);
 
 	free(data);
 	free(filename);
@@ -233,7 +242,7 @@ int main(int argc, char** argv)
 
 void printHelp(char* progname) 
 {
-	printf("%s 0.1\nusage: %s [-m mode] [-e errorCorrectionLevel] [-v version] [-w] [-f file] [-s size] [-h] [--] data ...\n"
+	printf("%s 0.1\nusage: %s [-m mode] [-e errorCorrectionLevel] [-v version] [-w] [-f file] [-s size | -n size] [-q size] [-o] [--mask mask] [--no-mask] [--no-data] [-h] [--] data ...\n"
 			
 			"\n"
 			"-m, --mode             Encoding Mode. Use 'a' for alphanumeric, 'n' for numeric or 'b' for binary encodation.\n"
@@ -249,6 +258,14 @@ void printHelp(char* progname)
 			"                       NOTE: Only png and svg are supported.\n\n"
 			"-s, --size             Qrcode Size in Pixels.\n"
 			"                       Default 200.\n\n"
+			"-m, --modul-size       The size is interpreted as the size of one bit module.\n\n"
+			"-o, --optimal-size     Calculate the size, that each module has an integral number of bits.\n\n"
+			"-q, --quiet-zone       Draw a quietzone around the Qrcodes with a size of <size> modules.\n"
+			"                       Default size 4.\n\n"
+			"--mask                 Use this mask.\n"
+			"                       Default auto.\n\n"
+			"--no-data              Don't encode any data. data and error correction codewords are set to 0.\n\n"
+			"--no-mask              Don't mask the data.\n\n"
 			"-h, --help             Print this help.\n\n"
 			"--version              Print version number.\n\n"
 			"--                     Ignore all options after this.\n\n"
