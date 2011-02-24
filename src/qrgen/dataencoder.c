@@ -34,7 +34,7 @@ bool encodeData(bitstream* bs, const SymbolInfo* si)
 		encode = &encodeNumeric;
 	break;
 	default:
-		fprintf(stderr, "Error: Mode not supported: %d", si->encodeMode);
+		error(__FILE__, __LINE__, "Mode not supported: %d", si->encodeMode);
 		return false;
 	}
 
@@ -99,7 +99,7 @@ bool encodeNumeric(bitstream* bs, const byte* data, int dataSize)
 	//change from alpha to int
 	for (i = 0; i < dataSize; i++) {
 		if (data[i]< '0' || data[i] > '9') {
-			fprintf(stderr, "Error: Not a number: %c", data[i]);
+			error(__FILE__, __LINE__, "Not a number: %c", data[i]);
 			return false; 
 		}
 		tdata[i] = data[i] - '0';
@@ -177,7 +177,7 @@ byte alphaValue(byte alpha)
 	for (i = 0; i < 9; i++) {
 		if (others[i] == alpha) return ret+i;
 	}
-	fprintf(stderr, "Error: Character not usable in alpha mode: %c", alpha);
+	error(__FILE__, __LINE__, "Character not usable in alpha mode: %c", alpha);
 
 	return -1;
 

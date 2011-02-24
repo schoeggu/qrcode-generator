@@ -13,14 +13,14 @@ static byte galois[256];
 bool generateErrorCorrectionCode(const byte* const data, int dataSize, byte* dest, int ecBlocks)
 {
 	if (!data || !dest) {
-		fprintf(stderr, "Error: Cannot calculate Error correction, inputData or Dest is NULL\n");	
+		error(__FILE__, __LINE__, "Cannot calculate Error correction, inputData or Dest is NULL");	
 		return 0;
 	}
 
 	/* first get de Generator Polinomial */
 	const byte* genpoly = get_gp(ecBlocks);
 	if (!genpoly) {
-		fprintf(stderr, "Error: Cannot calculate Error correction, coudn't retreive Generator Polynomial\n");	
+		error(__FILE__, __LINE__, "Cannot calculate Error correction, coudn't retreive Generator Polynomial");	
 		return false;
 	}
 

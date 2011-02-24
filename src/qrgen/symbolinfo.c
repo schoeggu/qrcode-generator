@@ -14,7 +14,7 @@ bool blockwiseErrorCorrection(SymbolInfo* si, bitstream* bs);
 SymbolInfo* si_create(const byte* data, int dataCount)
 {
 	if (!data || dataCount < 0) {
-		fprintf(stderr, "Error: no data specified\n");
+		error(__FILE__, __LINE__, "No data specified");
 		return NULL;
 	}
 	
@@ -63,11 +63,11 @@ void si_destroy(SymbolInfo* si)
 bool si_set_version(SymbolInfo* si, int version)
 {
 	if (!si || version < 0 || version > 40) {
-		fprintf(stderr, "Error: specified version not in range: %d", version);
+		error(__FILE__, __LINE__, "Specified version not in range: %d", version);
 		return false; 
 	}
 	if (!fits_to_version(version, si->dataCount, si->encodeMode, si->ecLevel)) {
-		fprintf(stderr, "Error: cannot set version. version has not enough data capacity. Minimal required version: %d\n", get_min_version(si->dataCount, si->encodeMode, si->ecLevel));
+		error(__FILE__, __LINE__, "Cannot set version. Version has not enough data capacity. Minimal required version: %d", get_min_version(si->dataCount, si->encodeMode, si->ecLevel));
 		return false;
 	}
 
@@ -85,12 +85,12 @@ bool si_set_autoversion(SymbolInfo* si)
 bool si_set_data(SymbolInfo* si, const byte* data, int dataCount)
 {
 	if (!data || dataCount < 0) {
-		fprintf(stderr, "Error: no Input data\n");			
+		error(__FILE__, __LINE__, "No Input data");			
 		return false;
 	}
 	
 	if (!fits_to_version(si->version, dataCount, si->encodeMode, si->ecLevel)) {
-		fprintf(stderr, "Error: data does not fit to new version. Minimal required version: %d\n", get_min_version(dataCount, si->encodeMode, si->ecLevel));
+		error(__FILE__, __LINE__, "Data does not fit to new version. Minimal required version: %d", get_min_version(dataCount, si->encodeMode, si->ecLevel));
 		return false;
 	}
 
@@ -103,12 +103,12 @@ bool si_set_data(SymbolInfo* si, const byte* data, int dataCount)
 bool si_set_mode(SymbolInfo* si, int mode)
 {
 	if (mode != ModeNumeric && mode != ModeAlpha && mode != ModeByte) {
-		fprintf(stderr, "Error: Invalid encode mode: %d", mode);
+		error(__FILE__, __LINE__, "Invalid encode mode: %d", mode);
 		return false;
 	}
 	
 	if (!fits_to_version(si->version, si->dataCount, mode, si->ecLevel)) {
-		fprintf(stderr, "Error: data does not fit to version with new encode mode. Minimal required version: %d\n", get_min_version(si->dataCount, mode, si->ecLevel));
+		error(__FILE__, __LINE__, "Data does not fit to version with new encode mode. Minimal required version: %d", get_min_version(si->dataCount, mode, si->ecLevel));
 		return false;
 	}
 	
@@ -119,12 +119,12 @@ bool si_set_mode(SymbolInfo* si, int mode)
 bool si_set_eclevel(SymbolInfo* si, int level)
 {
 	if (!si || level < 0 || level > 3) {
-		fprintf(stderr, "Error: Invalid error correction level.\n");
+		error(__FILE__, __LINE__, "Invalid error correction level");
 		return false;
 	}
 	
 	if (!fits_to_version(si->version, si->dataCount, si->encodeMode, level)) {
-		fprintf(stderr, "Error: data does not fit to version with new error correction level. Minimal required version: %d\n", get_min_version(si->dataCount, si->encodeMode, level));
+		error(__FILE__, __LINE__, "Data does not fit to version with new error correction level. Minimal required version: %d", get_min_version(si->dataCount, si->encodeMode, level));
 		return false;
 	}
 	
@@ -136,7 +136,7 @@ bool si_set_eclevel(SymbolInfo* si, int level)
 bool si_set_mask(SymbolInfo* si, int mask)
 {
 	if (!si || mask < -1 || mask > 7) {
-		fprintf(stderr, "Error: invalid mask\n");
+		error(__FILE__, __LINE__, "Invalid mask");
 		return false;
 	}
 	
@@ -163,7 +163,7 @@ bool si_encode(SymbolInfo* si)
 	/* 2. encode data */
 	bitstream* bs = bs_init();
 	if (!bs) {
-		fprintf(stderr, "Error: Counldn't initialize bitstream\n");
+		error(__FILE__, __LINE__, "Counldn't initialize bitstream");
 		return false;
 	}	
 	bool ret = encodeData(bs, si);
