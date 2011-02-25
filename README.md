@@ -9,114 +9,196 @@ Requirements
 - gnu tool chain
 - libCairo >= 1.10.0 (probably works also with older releases, but i didn't test it)
 
-Optional:
+***Optional***
 
 - gtk+-2.0 >= 2.20.1
-- python >= 2.7
+- python   >= 2.7
+- pygtk    >= 2.20
+- pycairo  >= 1.8.10
 
 Usage (Sample Program)
 ----------------------
 
-	qrgen [-m mode] [-e errorCorrectionLevel] [-v version] [-w] [-f file] [-s size] [-h] [--] data ...
+	usage: qrgen.exe [-m mode] [-e errorCorrectionLevel] [-v version] [-w] [-f file] [-s size | -n size] [-q size] [-o] [--mask mask] [--no-mask] [--no-data] [-h] [--] data ...
 
 	-m, --mode             Encoding Mode. Use 'a' for alphanumeric, 'n' for numeric or 'b' for binary encodation.
-	                       Default: binary
+						   Default: binary
 
 	-e, --eclevel          Error Correction Level. Use 'l' for low, 'm' for medium, 'q' for more or 'h' for high.
-	                       Default: high
-	
+						   Default: high
+
 	-v, --symbol-version   Version. The specified version must be between and including 1 and 40.
-	                       If the version is 0, the programm chooses the smallest possible version itself.
-	                       Default: 0
-	
+						   If the version is 0, the programm chooses the smallest possible version itself.
+						   Default: 0
+
 	-w, --window           Displays the qrcode in a window.
-	
+
 	-f, --file             Save the qrcode to the specified file.
-	                       If -f is not set, the programm displays the qrcode in a window.
-	                       NOTE: Only png and svg are supported.
-	
+						   If -f is not set, the programm displays the qrcode in a window.
+						   NOTE: Only png and svg are supported.
+
 	-s, --size             Qrcode Size in Pixels.
-	                       Default 200.
-	
+						   Default 200.
+
+	-m, --modul-size       The size is interpreted as the size of one bit module.
+
+	-o, --optimal-size     Calculate the size, that each module has an integral number of bits.
+
+	-q, --quiet-zone       Draw a quietzone around the Qrcodes with a size of <size> modules.
+						   Default size 4.
+
+	--mask                 Use this mask.
+						   Default auto.
+
+	--no-data              Don't encode any data. data and error correction codewords are set to 0.
+
+	--no-mask              Don't mask the data.
+
 	-h, --help             Print this help.
-	
+
 	--version              Print version number.
-	
+
 	--                     Ignore all options after this.
-	
+
 	data                   The data to encode.
 
 	
-For Example:
+***For Example***
 
 	$ qrgen -m b -e h -f ./filename.svg -s 111 https://github.com/schoeggu/qrcode-generator
 
-Will create this:
+Will create this
 
 ![generated QR Code](http://img11.imageshack.us/img11/1316/qrgen1.png)
 	
 Usage (Library)
 ---------------
 
-Requirded Includes:
+***Requirded Includes***
 
 	#include "qrgen.h"
-	#include <cairo.h>
+
+***SymbolInfo***
+`SymbolInfo* si_create(byte* data, int dataLen)` 
+Return a pointer to a newly allocated SymbolInfo object. It is initialized with default values.
+
+`SymbolInfo* si_create_conf(const byte* data, int dataCount, int version, int mode, int level, int mask)` 
+Return a pointer to a newly allocated SymbolInfo object.
+
+`void si_destroy(SymbolInfo* si)` 
+Free the allocated memory for the SymbolInfo.
 
 
-Functions:
-Initialize The Qrgen Library
+`bool si_set_version(SymbolInfo* si, int version)` 
+Set the desired symbol version. version must be between 1 - 40, or may be `VERSION_AUTO`.
 
-	void qrgen_init()
-Free the allocated Memory again
+`bool si_set_auto_version(SymbolInfo* si)` 
+Make the library choose the smallest possible version itself.
 
-	void qrgen_destroy()
-	
-Generate a qrcode and draw it to `context`
+`bool si_set_data(SymbolInfo* si, const byte* data, int dataCount)` 
+Set the data to encode.
 
-	bool qrgen_generate(const byte* data, int dataSize, int version, EncodeModeIndicator mode, ECLevel ecLevel, cairo__t* context, int pixSize)
-	
-Parameters:
+`bool si_set_mode(SymbolInfo* si, int mode)` 
+Set the encodation mode. Can be either `ModeByte` or `ModeAlpha` or `ModeNumeric`.
 
-- `data`      The data you want to encode.
-- `dataSize`  Number of bytes in data.
-- `version`   The Symbol Version. 1 - 40. If 0, qrgen chooses the smallest possible version.
-- `mode`      Encode Mode.
-- `ecLevel`   Error Correction Level.
-- `context`   The cairo context to which is painted.
-- `pixSize`   Size of the qrcode in pixels.
+`bool si_set_eclevel(SymbolInfo* si, int level)` 
+Set the error correction level. Can be either `EC_L` or `EC_M` or `EC_Q` or `EC_H`.
 
-Returns:
+`bool si_set_mask(SymbolInfo* si, int mask)` 
+Set the mask to use. Must be between 0 and 7, or may be `MASK_AUTO`
 
-- `true`      if Succeeded
-- `false`     if Failed
+`void si_set_auto_mask(SymbolInfo* si)` 
+Make the library choose the optimal mask.
 
-Example:
+
+`bool si_encode(SymbolInfo* si)` 
+Encode the data. Must be done before painting.
+
+***PaintContext***
+`PaintContext* pc_create(cairo_t* cr)` 
+Return a pointer to a newly allocated PaintContext. The symbol will be painted to the specified cairo surface.
+
+`PaintContext* pc_create_for_file(char* filename)` 
+Return a pointer to a newly allocated PaintContext. The symbol will be written to the specified file.
+
+`void pc_destroy(PaintContext* pc)` 
+Free teh allocated memory for the PaintContext.
+
+
+
+`bool pc_set_cairo_context(PaintContext* pc, cairo_t* cr)` 
+Set another cairo context.
+
+`bool pc_set_filename(PaintContext* pc, char* filename)` 
+Set another filename.
+
+`bool pc_set_position(PaintContext* pc, double x, double y)` 
+Set where on the cairo context the qrcode will be painted.
+
+`bool pc_set_size(PaintContext* pc, int size, bool isBitSize)` 
+Set the size of the symbol. if `isbitSize` is true, `size` specifiec the size of one bit module. Otherwise it's the size of the whole symbol.
+
+`bool pc_set_is_bit_size(PaintContext* pc, bool isBitSize)` 
+Set whether the size is the bit module size or the symbol size.
+
+`bool pc_draw_quiet_zone(PaintContext* pc, bool drawQuietZone)` 
+Set wheter a quiet zone around the symbol shall be painted.
+
+`bool pc_set_quiet_zone_size(PaintContext* pc, int size)` 
+Set the size of the quiet zone (in bit modules)
+
+`bool pc_calculate_optimal_size(PaintContext* pc, bool calculateOptimalSize)` 
+Make the library calculate the size, so that each bit module has an integral number of pixels.
+
+`bool pc_set_foreground_color(PaintContext* pc, color c)` 
+Change the foreground color.
+
+`bool pc_set_background_color(PaintContext* pc, color c)` 
+Change the background color.
+
+***Paint***
+`bool paint_qrcode(const SymbolInfo* si, PaintContext* pc)` 
+Paint the symbol.
+
+
+***Example***
+Print a QR Code to a file
 
 	#include "qrgen.h"
-	#include <cairo.h>
+	#include <string.h> /* for strlen */
 
 	int main(int argc, char** argv)
 	{
-		cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 105, 105);
-		cairo_t* cr = cairo_create(surface);
+		char message[] = "Hello Old Friend!";
+		char filename[] = "welcome.png";
 		
-		/* initialize qrgen */
-		qrgen_init();
+		/* Setup the SymbolInfo */
+		SymbolInfo* si = si_create((byte*)message, strlen(message));
+		if (!si) return 1;
 		
-		/* generate qrcode and draw it to the surface    */
-		/* Version: auto, Encode mode: Alphanumeric      */
-		/* Error correction level: Medium, Size: 105x105 */
-		qrgen_generate((byte*)"Hello Old Friend", 17, 0, ModeAlpha, EC_M, cr, 105);
-
-		/* write the qrcode to a file */
-		cairo_surface_write_to_png(surface, "hi.png");
-
-		/*tear down qrgen */
-		qrgen_destroy();
+		si_set_mode(si, ModeAlpha);
+		si_set_eclevel(si, EC_Q);
+		bool ok = si_encode(si);
+		if (!ok) {
+			si_destroy(si);
+			return 1;
+		}
 		
-		cairo_destroy(cr);
-		cairo_surface_destroy(surface);
+		/* Setup the PaintContext */
+		PaintContext* pc = pc_create_for_file(filename);
+		if (!pc) {
+			si_destroy(si);
+			return 1;
+		}
+		
+		pc_set_size(pc, 105, false);
+			
+		/* write to the file */
+		paint_qrcode(si, pc);
+		
+		/* free allocated memory */
+		si_destroy(si);
+		pc_destroy(pc);
 		
 		return 0;
 	}
@@ -124,18 +206,23 @@ Example:
 	
 Will generate this:
 
-![generated QR Code](http://img26.imageshack.us/img26/5615/qrgen2.png)
-	
+![generated QR Code](http://img815.imageshack.us/img815/5826/welcomei.png)
+
+Python Bindings
+---------------
+Python bindings are far from completion.
+But basic functionality is implemented.
+See `pyqrgen.py` for a GUI example of how to use qrgen python bindings.
+
+To use qrgen in python you need `qrgen.so` and `pyqrgen.so` (called `pyqrgen.pyd` in Windows)
+
+
 Building
 --------
 
 Just call make
 
 	make
-If you want gtk support (for -w option) call
-
-	make USE_GTK=1
-_NOTE:_ There is a directory called *rc*. The programm only works if you call it from the directory containing that *rc* directory. This is pretty annoying an i am going to fix that soon.
 
 License
 -------

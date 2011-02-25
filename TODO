@@ -1,14 +1,12 @@
 Things Todo:
 
 - Make the library choose the best optimal mask pattern.
-As for now, it allways chooses mask 3.
+    As for now, it allways chooses mask 3 when set to autochoose.
 
 - Better Makefiles
 	- Use Autotools or CMake
 	- Make them work on windows, linux and os x
 	- Discover if there is no gtk+-2.0 and then don't build -w support in sample program.
-
-- Make the library more resistant to invalid input and other errors.
 
 - Create an gui example program
 
@@ -16,65 +14,9 @@ As for now, it allways chooses mask 3.
 
 - Create man pages for programs and headers
 
-- Improve api for the library
-	- Make it possible to write directly to a file, without supplying a cairo surface.
-	- Make it possible to choose, where on the surface the qrcode is drawn.
-	- Support other graphic libraries than cairo.
-	
-	API:
-	We need to be able to set:
-		- Data
-		- Filename (instead of data array)
-		- Enc Mode
-		- Version
-		- Error Correction Level
-		
-		- cairo context
-		- filename (instead of cairo context)
-		- code size
-		- bit size (instead of code size)
-		- x, y (position on context)
-		- quietZone size
-		- calculate optimalSize?
-		
-	We need functions:
-		- set...()
-		- get...()
-		- getMinVersion(dataLen, mode, eclevel)
-		- getCapacaty(version, mode, eclevel)
-		- getEncodedLen(mode, eclevel)
-		
-		- checkVersion() (autochoose, or check if version is large enough for data/mode/eclevel)
-		- readyForGeneration() (check if all nescessary options have been set. And wheter its ok (checkVersion() ...)
-		- generate()
-		
-		
-	
-
-- Option to add quiet zone
+- Support other graphic libraries than cairo.
 
 - Option to read data from file
-	
-- Option to choose optimal size
-	For example, version 3 has 29x29 bits, maybe we want each bit to be an absolute number of pixels wide
-	so for every bit to be 3x3 Pixels, size needs to be 29*3 = 87. Let the program calculate that by itself.
-	If we have version 5 (37x37) and say size = 340, the nearest optimal size is 333 (9*37).
-
-	--optimal-size [min|max|nearest]
-		min   take the next larger optimal size
-		max   take the next smaller optimal size
-		nearest (default)   take the nearest optimal size
-
-	--optimal-version
-		choose the version that fits most the optimal size:
-		example: minimum version is 9, size is 340, so version 9 goes to 371, version 10 goes to 342 and version 11 goes to 366
-		the optimal version is 10, because its optimal size is the nearest to the desired size
-		(but it needs a way to say a maximal version, so its not version 38 when only version 3 is needed, just because of a few pixels)
-
-	--bitSize
-		set the size of one bit of the qr code,
-		example: version 13, bitSize 12, v13 has 69x69 bits, so 69*12=828
-		this option overrides --optimal-size
 
 - Option to list statistics
 	which version, ecLevel and encodeMode can have how many characters?
