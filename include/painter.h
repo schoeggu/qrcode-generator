@@ -15,7 +15,7 @@ void drawFormatInformation(const PaintContext* pc, int version, int formatInfo);
 void drawVersionInformation(const PaintContext* pc, int version, int versionInfo);
 void drawData(const PaintContext* pc, const SymbolInfo* si);
 
-void drawBit(const PaintContext* pc, int version, const byte* data, int dataLen, int x, int y, int mask);
+void drawBit(const PaintContext* pc, const SymbolInfo* si, int x, int y);
 int applyMask(int pixel, int x, int y, int mask);
 
 void drawRaster(const PaintContext* pc, int version);

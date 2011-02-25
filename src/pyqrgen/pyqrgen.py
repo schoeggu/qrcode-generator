@@ -7,9 +7,6 @@ import gtk, gobject, cairo
 
 class Screen(gtk.DrawingArea):
 
-	
-	surfaceSize = 3000
-
 	__gsignals__ = { "expose-event": "override" }
 
 	def do_expose_event(self, event):
@@ -33,6 +30,7 @@ class Screen(gtk.DrawingArea):
 
 	def __init__(self):
 		gtk.DrawingArea.__init__(self)
+		self.surfaceSize = 3000
 		self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.surfaceSize, self.surfaceSize)
 		self.ctx = cairo.Context(self.surface)
 		pyqrgen.setCairoContext(self.ctx)
@@ -44,9 +42,11 @@ class ExpanderFrame(gtk.Frame):
 			self.w.hide()
 		else:
 			self.w.show_all()
-			
-	def getFrame(self):
-		return self.frame
+	
+	def set_expanded(self, exp):
+		self.expanderlabel.set_expanded(exp)
+		if exp == True: 
+			self.w.show_all()
 		
 	def __init__(self, widget, label):
 		gtk.Frame.__init__(self)
@@ -74,7 +74,6 @@ class Win:
 	def regen_qr(self):
 		pyqrgen.encode()
 		self.redraw_qr()
-	
 	
 	def pcchanged(self, widget):
 		if widget == self.maskspinner:
@@ -140,8 +139,6 @@ class Win:
 			
 		self.regen_qr()
 		
-
-
 	def output(self, widget):
 		if widget == self.verspinner and self.verspinner.props.value == 0:
 			self.verspinner.props.text = "Auto"
@@ -238,7 +235,6 @@ class Win:
 		frame = ExpanderFrame(detailstable, "Debug Settings")
 		
 		return frame
-
 		
 	def getOptionPane(self):
 		detailstable = gtk.Table(3, 2, False)
@@ -292,9 +288,11 @@ class Win:
 		self.window.set_title("qrgen")
 		self.window.connect("delete_event", gtk.main_quit)
 
-		self.mainbox = gtk.VBox(False, 0)
+		self.mainbox = gtk.HBox(False, 0)
+		self.optbox = gtk.VBox(False, 0)
 		
 		self.options = self.getOptionPane()
+		self.options.set_expanded(True)
 		self.advanced = self.getAdvancedPane()
 		self.debug = self.getDebugPane()
 		
@@ -311,27 +309,27 @@ class Win:
 		self.screen = Screen()
 		self.aframe.add(self.screen)
 
-		self.mainbox.pack_start(self.genbox, False, False, 0)
-		self.mainbox.pack_start(self.options, False, False, 0)
-		self.mainbox.pack_start(self.advanced, False, False, 0)
-		self.mainbox.pack_start(self.debug, False, False, 0)
+		self.optbox.pack_start(self.genbox, False, False, 0)
+		self.optbox.pack_start(self.options, False, False, 0)
+		self.optbox.pack_start(self.advanced, False, False, 0)
+		self.optbox.pack_start(self.debug, False, False, 0)
+		
+		self.mainbox.pack_start(self.optbox, False, False, 0)
 		self.mainbox.pack_start(self.aframe, True, True, 0)
 
 		self.window.add(self.mainbox)
 		
-		self.window.set_default_size(215, 260)
+		self.window.set_default_size(390, 150)
 		
 		self.genbox.show_all()
 		self.aframe.show_all()
+		self.optbox.show()
 		self.mainbox.show()
 		self.window.show()
 
-def run(Widget):
-	widget = Widget()
-	gtk.main()
-
 if __name__ == "__main__":
-	run(Win)
+	widget = Win()
+	gtk.main()
 
 	
 	

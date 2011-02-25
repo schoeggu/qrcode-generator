@@ -8,6 +8,7 @@
 #include <string.h>
 
 inline int getNumPixels(int version) { return 21 + 4 * (version - 1); }
+inline bool skip(const PaintContext* pc, int zone) { printf("skipzone[%x], zone[%x], skip[%d]\n", pc->skipZone, zone, (pc->skipZone & zone)); return pc->debug && (pc->skipZone & zone); }
 
 int idx = 0;
 int bitNum = 7;
@@ -64,7 +65,8 @@ bool paint_qrcode(const SymbolInfo* si, PaintContext* pc)
 	}
 	
 	cairo_translate(pc->cr, pc->x, pc->y);
-	cairo_scale(pc->cr, (float)size/(numPixels + quietZoneSize * 2), (float)size/(numPixels + quietZoneSize * 2));
+	double sc = ((double)size)/((double)numPixels + quietZoneSize * 2);
+	cairo_scale(pc->cr, sc, sc);
 
 	
 	/* draw a background */
@@ -155,14 +157,18 @@ void drawFinderPattern(const PaintContext* pc, int x, int y)
 	cairo_save(cr);
 
 	cairo_translate(cr, x, y);
+	
+	if (!skip(pc, QR_FINDER_PATTERN)) {
 
-	set_color(cr, pc->foreground);
-	cairo_rectangle(cr, 2, 2, 3, 3);
-	cairo_fill(cr);
+		set_color(cr, pc->foreground);
+		cairo_rectangle(cr, 2, 2, 3, 3);
+		cairo_fill(cr);
 
-	cairo_set_line_width(cr, 1);
-	cairo_rectangle(cr, 0.5, 0.5, 6, 6);
-	cairo_stroke(cr);
+		cairo_set_line_width(cr, 1);
+		cairo_rectangle(cr, 0.5, 0.5, 6, 6);
+		cairo_stroke(cr);
+		
+	}
 
 	cairo_restore(cr);
 
@@ -179,13 +185,17 @@ void drawTimingPattern(const PaintContext* pc, int version)
 	cairo_save(cr);
 
 	set_color(cr, pc->foreground);
+	
+	printf("call skip for timing pattern: [%x]\n", QR_TIMING_PATTERN);
+	if (!skip(pc, QR_TIMING_PATTERN)) {
 
-	for (row = 6, collumn = 8; collumn < numPixels - 8; collumn+= 2) {
-		cairo_rectangle(cr, row, collumn, 1, 1);
-		cairo_rectangle(cr, collumn, row, 1, 1);
-	}
+		for (row = 6, collumn = 8; collumn < numPixels - 8; collumn+= 2) {
+			cairo_rectangle(cr, row, collumn, 1, 1);
+			cairo_rectangle(cr, collumn, row, 1, 1);
+		}
 		cairo_fill(cr);
-
+	}
+	
 	cairo_restore(cr);
 }
 
@@ -196,16 +206,20 @@ void drawAlignmentPattern(const PaintContext* pc, int x, int y)
 	cairo_save(cr);
 
 	cairo_translate(cr, x-2, y-2);
+	
+	if (!skip(pc, QR_ALIGNEMENT_PATTERN)) {
 
-	set_color(cr, pc->foreground);
-	cairo_rectangle(cr, 0.0, 0.0, 5, 5);
-	cairo_fill(cr);
-	set_color(cr, pc->background);
-	cairo_rectangle(cr, 1.0, 1.0, 3, 3);
-	cairo_fill(cr);
-	set_color(cr, pc->foreground);
-	cairo_rectangle(cr, 2, 2, 1, 1);
-	cairo_fill(cr);
+		set_color(cr, pc->foreground);
+		cairo_rectangle(cr, 0.0, 0.0, 5, 5);
+		cairo_fill(cr);
+		set_color(cr, pc->background);
+		cairo_rectangle(cr, 1.0, 1.0, 3, 3);
+		cairo_fill(cr);
+		set_color(cr, pc->foreground);
+		cairo_rectangle(cr, 2, 2, 1, 1);
+		cairo_fill(cr);
+		
+	}
 
 	cairo_restore(cr);
 }
@@ -244,28 +258,31 @@ void drawFormatInformation(const PaintContext* pc, int version, int formatInfo)
 	
 	int numPixels = getNumPixels(version);
 	
-	set_color(cr, pc->foreground);
+	if (!skip(pc, QR_FORMAT_INFO)) {
+		set_color(cr, pc->foreground);
+		
+		int x, y;
+		for (x = 8, y = 0; y < 8; y++) {
+			if (formatInfo & 1) {
+				cairo_rectangle(cr, x, (y < 6 ? y : y + 1), 1, 1);
+				cairo_rectangle(cr, numPixels - y - 1, x, 1, 1);
+			}
+			formatInfo >>= 1;	
+		}
+		for (x = 6, y = 8; x >= 0; x--) {
+			if (formatInfo & 1) {
+				cairo_rectangle(cr, (x < 6 ? x : x + 1), y, 1, 1);
+				cairo_rectangle(cr, y, numPixels - x - 1, 1, 1);
+			}
+			formatInfo >>= 1;
+		}
+
+		/* print Black Module above lower left Version Info */
+		cairo_rectangle(cr, 8, numPixels - 8, 1, 1);
+
+		cairo_fill(cr);
+	}
 	
-	int x, y;
-	for (x = 8, y = 0; y < 8; y++) {
-		if (formatInfo & 1) {
-			cairo_rectangle(cr, x, (y < 6 ? y : y + 1), 1, 1);
-			cairo_rectangle(cr, numPixels - y - 1, x, 1, 1);
-		}
-		formatInfo >>= 1;	
-	}
-	for (x = 6, y = 8; x >= 0; x--) {
-		if (formatInfo & 1) {
-			cairo_rectangle(cr, (x < 6 ? x : x + 1), y, 1, 1);
-			cairo_rectangle(cr, y, numPixels - x - 1, 1, 1);
-		}
-		formatInfo >>= 1;
-	}
-
-	/* print Black Module above lower left Version Info */
-	cairo_rectangle(cr, 8, numPixels - 8, 1, 1);
-
-	cairo_fill(cr);
 	cairo_restore(cr);
 }
 
@@ -278,21 +295,23 @@ void drawVersionInformation(const PaintContext* pc, int version, int versionInfo
 	
 	int numPixels = getNumPixels(version);
 	
-	set_color(cr, pc->foreground);
-	
-	int x, y;
-	for (x = 0; x < 6; x++) {
-		for (y = numPixels - 11; y < numPixels - 8; y++) {
-			if (versionInfo & 1) {
-				cairo_rectangle(cr, x, y, 1, 1);
-				cairo_rectangle(cr, y, x, 1, 1);
-			}
-			versionInfo >>= 1;
+	if (!skip(pc, QR_VERSION_INFO)) {
+		set_color(cr, pc->foreground);
+		
+		int x, y;
+		for (x = 0; x < 6; x++) {
+			for (y = numPixels - 11; y < numPixels - 8; y++) {
+				if (versionInfo & 1) {
+					cairo_rectangle(cr, x, y, 1, 1);
+					cairo_rectangle(cr, y, x, 1, 1);
+				}
+				versionInfo >>= 1;
 
+			}
 		}
+		
+		cairo_fill(cr);
 	}
-	
-	cairo_fill(cr);
 	
 	cairo_restore(cr);
 }
@@ -311,8 +330,8 @@ void drawData(const PaintContext* pc, const SymbolInfo* si)
 		
 		//draw two columns upwards
 		for (y = numPixels-1; y >= 0; y--) {
-			drawBit(pc, si->version, si->encodedData, si->totalCodeWords, x, y, si->mask);
-			drawBit(pc, si->version, si->encodedData, si->totalCodeWords, x-1, y, si->mask);
+			drawBit(pc, si, x, y);
+			drawBit(pc, si, x-1, y);
 		}
 		
 		x-=2;
@@ -320,8 +339,8 @@ void drawData(const PaintContext* pc, const SymbolInfo* si)
 		
 		//draw two columns downwards
 		for (y = 0; y <= numPixels-1; y++) {
-			drawBit(pc, si->version, si->encodedData, si->totalCodeWords, x, y, si->mask);
-			drawBit(pc, si->version, si->encodedData, si->totalCodeWords, x-1, y, si->mask);
+			drawBit(pc, si, x, y);
+			drawBit(pc, si, x-1, y);
 		}
 	}
 	cairo_fill(cr);
@@ -329,16 +348,22 @@ void drawData(const PaintContext* pc, const SymbolInfo* si)
 	cairo_restore(cr);
 }
 
-void drawBit(const PaintContext* pc, int version, const byte* data, int dataLen, int x, int y, int mask)
+void drawBit(const PaintContext* pc, const SymbolInfo* si, int x, int y)
 {
 	 
-	if (!intersectsPattern(x, y, version)) {
+	if (!intersectsPattern(x, y, si->version)) {
 		if (bitNum < 0) { bitNum = 7; idx++; }
 		int pixel = 0;
-		if (idx < dataLen && (!(pc->debug && pc->noData))) pixel = (data[idx] >> bitNum--);
-		if (applyMask(pixel, x, y, (pc->debug && pc->noMask) ? MASK_NONE : mask) & 1) {
-			cairo_rectangle(pc->cr, x, y, 1, 1);
+		
+		if (idx < si->totalCodeWords && (!(pc->debug && pc->noData))) {
+			pixel = (si->encodedData[idx] >> bitNum--);
 		}
+		
+		if (!skip(pc, ((idx < si->dataCodeWords) ? QR_DATA : ((idx < si->totalCodeWords) ? QR_EC : QR_REMAINDER)))) {
+			if (applyMask(pixel, x, y, (pc->debug && pc->noMask) ? MASK_NONE : si->mask) & 1) {
+				cairo_rectangle(pc->cr, x, y, 1, 1);
+			}
+		}		
 	}
 }
 
