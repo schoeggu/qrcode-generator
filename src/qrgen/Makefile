@@ -1,5 +1,4 @@
-SRC =	qrgen.c \
-		symbolinfo.c \
+SRC =	symbolinfo.c \
 		bitstream.c \
 		dataencoder.c \
 		ec.c \
