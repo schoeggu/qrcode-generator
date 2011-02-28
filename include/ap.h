@@ -12,9 +12,9 @@ typedef struct {
 	int version;
 	int numberOfPatterns;
 	point* position;
-} AlignementPatternPosition;
+} AlignmentPatternPosition;
 
-AlignementPatternPosition* ap_create(int version);
+AlignmentPatternPosition* ap_create(int version);
 
 void ap_destroy();
 

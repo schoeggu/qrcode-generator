@@ -179,15 +179,6 @@ static PyObject* pyqrgen_set_background(PyObject* self, PyObject* args)
 	Py_RETURN_FALSE;
 }
 
-static PyObject* pyqrgen_enable_debug_options(PyObject* self, PyObject* args)
-{
-	bool debug;
-	if (PyArg_ParseTuple(args, "i", &debug)) {
-		return PyBool_FromLong(pc_enable_debug_options(pc, debug));
-	}
-	Py_RETURN_FALSE;
-}
-
 static PyObject* pyqrgen_enable_draw_raster(PyObject* self, PyObject* args)
 {
 	bool drawRaster;
@@ -245,7 +236,6 @@ static PyMethodDef QrgenMethods[] = {
 	{"calculateOptimalSize", pyqrgen_calculate_optimal_size, METH_VARARGS, "Calculate the optimal size."},
 	{"setForegroundColor", pyqrgen_set_foreground, METH_VARARGS, "Set the foreground color."},
 	{"setBackgroundColor", pyqrgen_set_background, METH_VARARGS, "Set the background color."},
-	{"enableDebugOptions", pyqrgen_enable_debug_options, METH_VARARGS, "Enable debug options."},
 	{"drawRaster", pyqrgen_enable_draw_raster, METH_VARARGS, "Draw a raster."},
 	{"dontMask", pyqrgen_enable_dont_mask, METH_VARARGS, "Don't Mask the data."},
 	{"dontDrawData", pyqrgen_enable_dont_draw_data, METH_VARARGS, "Don't draw any data."},	

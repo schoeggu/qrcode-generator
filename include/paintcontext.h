@@ -2,20 +2,11 @@
 #define PAINTCONTEXT_H
 
 #include "util.h"
+#include "color.h"
 
 #include <cairo.h>
 
 static const int MASK_NONE = -2;
-
-typedef struct {
-	double r;
-	double g;
-	double b;
-	double a;
-} color;
-
-static const color WHITE = {1, 1, 1, 1};
-static const color BLACK = {0, 0, 0, 1};
 
 typedef struct {
 	cairo_t* cr;                /*  cairo context to which te qrcode is painted */
@@ -38,26 +29,29 @@ typedef struct {
 	color background;           /* background color */
 	
 	/* Debug options */
-	bool debug;                 /* if debug is False, the options below are ignored */
+
 	int highlightZone;			/* which zones need to be highlighted , can be any combination of QRZones */
 	int skipZone;               /* which zones don't need to be painted. can be any combination of QRZones */
 	bool drawRaster;            /* draw a raster */
 	
 	bool noMask;                /* don't mask the data */
 	bool noData;                /* ignore data, don't generate error correction code, everything is set to 0 */
+
+	int hiZone;                 /* whicht zones need to be highlighted */
+	color hiColors[8];         /* color to highlight each zone */
+
 } PaintContext;
 
 typedef enum {
 	QR_FINDER_PATTERN =     1,
-	QR_ALIGNEMENT_PATTERN = 1 << 1,
+	QR_ALIGNMENT_PATTERN = 1 << 1,
 	QR_TIMING_PATTERN =     1 << 2,
 	QR_DATA =               1 << 3,
 	QR_EC =                 1 << 4,
 	QR_REMAINDER =          1 << 5,
 	QR_VERSION_INFO =       1 << 6,
 	QR_FORMAT_INFO =        1 << 7,
-	QR_QUIET_ZONE =         1 << 8,
-	QR_ALL =                0x1FF,
+	QR_ALL =                0xFF,
 	
 	QR_BACKGROUND =         1 << 9,
 	QR_FOREGROUND =         1 << 10
@@ -84,16 +78,17 @@ bool pc_calculate_optimal_size(PaintContext* pc, bool calculateOptimalSize);
 bool pc_set_foreground_color(PaintContext* pc, color c);
 bool pc_set_background_color(PaintContext* pc, color c);
 
-bool pc_enable_debug_options(PaintContext* pc, bool enableDebugOptions);
-
 bool pc_set_skipped_zones(PaintContext* pc, int zones);
 bool pc_skip_zone(PaintContext* pc, int zone, bool skip);
 bool pc_set_highlighted_zones(PaintContext* pc, int zones);
-bool pc_highlight_zone(PaintContext* pc, int zone, bool skip);
+bool pc_highlight_zone(PaintContext* pc, int zone, bool highlight);
+bool pc_set_highlight_color(PaintContext* pc, int zone, color c);
+color pc_get_highlighted_color(const PaintContext* pc, int zone);
 bool pc_set_draw_raster(PaintContext* pc, bool draw_raster);
 bool pc_set_dont_mask(PaintContext* pc, bool drawnomask);
 bool pc_set_draw_no_data(PaintContext* pc, bool nodata);
 
-inline void set_color(cairo_t* cr, color c);
+bool pc_set_default_colors(PaintContext* pc);
+
 
 #endif //PAINTCONTEXT_H

@@ -7,6 +7,7 @@ SRC =	symbolinfo.c \
 		util.c \
 		painter.c \
 		paintcontext.c \
+		color.c \
 
 LIB = libqrgen.so
 

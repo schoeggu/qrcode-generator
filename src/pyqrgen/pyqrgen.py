@@ -76,10 +76,8 @@ class Win:
 		self.redraw_qr()
 	
 	def pcchanged(self, widget):
-		if widget == self.maskspinner:
-			pyqrgen.setMask(int(self.maskspinner.props.value)-1)
 			
-		elif widget == self.quietbutton:
+		if widget == self.quietbutton:
 			pyqrgen.drawQuietZone(self.quietbutton.props.active)
 			
 		elif widget == self.forebutton:
@@ -87,9 +85,6 @@ class Win:
 			
 		elif widget == self.backbutton:
 			pyqrgen.setBackgroundColor(self.backbutton.props.color.red, self.backbutton.props.color.green, self.backbutton.props.color.blue, self.backbutton.props.alpha)
-
-		elif widget == self.endebugbutton:
-			pyqrgen.enableDebugOptions(self.endebugbutton.props.active)
 
 		elif widget == self.nomaskbutton:
 			pyqrgen.dontMask(self.nomaskbutton.props.active)
@@ -109,6 +104,8 @@ class Win:
 			pyqrgen.setData(self.entry.get_text(), len(self.entry.get_text()))
 			self.generated = True
 
+		elif widget == self.maskspinner:
+			pyqrgen.setMask(int(self.maskspinner.props.value)-1)
 			
 		elif widget == self.verspinner:
 			pyqrgen.setVersion(int(self.verspinner.props.value))
@@ -159,7 +156,7 @@ class Win:
 		maskadj = gtk.Adjustment(0, 0, 8, 1, 0 ,0)
 		self.maskspinner = gtk.SpinButton(maskadj, 0.1, 0)
 		self.maskspinner.set_wrap(True)
-		self.maskspinner.connect("value-changed", self.pcchanged)
+		self.maskspinner.connect("value-changed", self.sichanged)
 		self.maskspinner.connect("output", self.output)
 		detailstable.attach(maskalign, 0, 1, 0, 1, gtk.FILL, gtk.FILL, 2, 0)
 		detailstable.attach(self.maskspinner, 1, 2, 0, 1, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
@@ -198,14 +195,6 @@ class Win:
 		detailstable = gtk.Table(4, 2, False)
 		detailstable.set_row_spacings(2)
 		detailstable.set_col_spacings(2)
-
-		endebuglabel = gtk.Label("Enable Debug Options")
-		endebugalign = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
-		endebugalign.add(endebuglabel)
-		self.endebugbutton = gtk.CheckButton(None, False)
-		self.endebugbutton.connect("toggled", self.pcchanged)
-		detailstable.attach(endebugalign, 0, 1, 0, 1, gtk.FILL, gtk.FILL, 2, 0)
-		detailstable.attach(self.endebugbutton, 1, 2, 0, 1, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 
 		nomasklabel = gtk.Label("Don't mask")
 		nomaskalign = gtk.Alignment(0.0, 0.5, 0.0, 0.0)

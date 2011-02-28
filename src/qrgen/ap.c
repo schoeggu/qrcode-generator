@@ -50,7 +50,7 @@ static const int positionIndicator[40][9] = {
 };
 
 
-void ap_destroy(AlignementPatternPosition* a)
+void ap_destroy(AlignmentPatternPosition* a)
 {
 	if (a) {
 		if (a->position) free(a->position);
@@ -59,12 +59,12 @@ void ap_destroy(AlignementPatternPosition* a)
 	a = NULL;
 }
 
-AlignementPatternPosition* ap_create(int version)
+AlignmentPatternPosition* ap_create(int version)
 {
 
 	if (version < 1 && version > 40) return NULL;
 
-	AlignementPatternPosition* a = calloc(sizeof(AlignementPatternPosition), 1);
+	AlignmentPatternPosition* a = calloc(sizeof(AlignmentPatternPosition), 1);
 
 	int i;
 	int j = 0;
@@ -77,7 +77,7 @@ AlignementPatternPosition* ap_create(int version)
 
 	version--;
 
-	/* first number is number of alignement patterns */
+	/* first number is number of alignment patterns */
 	numberAp = positionIndicator[version][0];
 
 	if (version != 0) numPosition = sqrt(numberAp + 3);

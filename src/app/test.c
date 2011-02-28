@@ -218,15 +218,16 @@ int main(int argc, char** argv)
 	
 	PaintContext* pc = pc_create_for_file(filename);
 	pc_set_size(pc, size, modulsize);
-	if (optimalsize) pc_calculate_optimal_size(pc, true);
+//	if (optimalsize) pc_calculate_optimal_size(pc, true);
 	if (quietzone) pc_set_quiet_zone_size(pc, quietzone);
 	
-	pc_set_foreground_color(pc, WHITE);
-	pc_set_background_color(pc, BLACK);
+//	pc_set_foreground_color(pc, WHITE);
+//	pc_set_background_color(pc, BLACK);
 	
-	pc_enable_debug_options(pc, nomask | nodata);
 	pc_set_dont_mask(pc, nomask);
 	pc_set_draw_no_data(pc, nodata);
+
+	pc_set_highlighted_zones(pc, QR_ALL);
 	
 	paint_qrcode(si, pc);
 	

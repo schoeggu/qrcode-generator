@@ -19,9 +19,8 @@ PaintContext* pc_create(cairo_t* cr)
 	}
 	
 	pc->cr = cr;
-	
-	pc->foreground = BLACK;
-	pc->background = WHITE;
+
+	pc_set_default_colors(pc);
 	
 	return pc;
 }
@@ -42,8 +41,7 @@ PaintContext* pc_create_for_file(char* filename)
 	
 	pc_set_filename(pc, filename);
 	
-	pc->foreground = BLACK;
-	pc->background = WHITE;
+	pc_set_default_colors(pc);
 	
 	return pc;
 }
@@ -202,18 +200,6 @@ bool pc_set_background_color(PaintContext* pc, color c)
 	return true;
 }
 
-bool pc_enable_debug_options(PaintContext* pc, bool enableDebugOptions)
-{
-	if (!pc) {
-		error("Cannot set enable debug options, pc is NULL");
-		return false;
-	}
-	
-	pc->debug = enableDebugOptions;
-	
-	return true;
-}
-
 bool pc_set_skipped_zones(PaintContext* pc, int zones)
 {
 	if (!pc) {
@@ -269,7 +255,7 @@ bool pc_set_highlighted_zones(PaintContext* pc, int zones)
 	return true;
 }
 
-bool pc_highlight_zone(PaintContext* pc, int zone, bool skip)
+bool pc_highlight_zone(PaintContext* pc, int zone, bool hi)
 {
 	if (!pc) {
 		error("Cannot set highlight zone, pc is NULL");
@@ -281,7 +267,7 @@ bool pc_highlight_zone(PaintContext* pc, int zone, bool skip)
 		return false;
 	}
 	
-	if (skip) {
+	if (hi) {
 		pc->highlightZone |= zone;
 	} else {
 		pc->highlightZone &= ~zone;
@@ -289,6 +275,47 @@ bool pc_highlight_zone(PaintContext* pc, int zone, bool skip)
 	
 	return true;
 }
+
+bool pc_set_highlight_color(PaintContext* pc, int zone, color c)
+{
+	if (!pc) {
+		error("Cannot set highlight color, pc is NULL");
+		return false;
+	}
+
+	if (~QR_ALL & zone) {
+		error("Cannot set highlight color, invalid zone");
+		return false;
+	}
+
+	int index = 0;
+	while (!(zone>>index & 1)) index++;
+	pc->hiColors[index] = c;
+
+	return true;
+}
+
+color pc_get_highlighted_color(const PaintContext* pc, int zone)
+{
+	if (!pc) {
+		error("Cannot get highlighted color, pc is NULL");
+		color c = {0, 0, 0, 0};
+		return c;
+	}
+
+	if (~QR_ALL & zone) {
+		error("Cannot set highlighted zones, invalid zones");
+		color c = {0, 0, 0, 0};
+		return c;
+	}
+
+	int index = 0;
+	while (!(zone>>index & 1)) index++;
+	return pc->hiColors[index];
+
+
+}
+
 
 bool pc_set_draw_raster(PaintContext* pc, bool draw_raster)
 {
@@ -326,7 +353,25 @@ bool pc_set_draw_no_data(PaintContext* pc, bool nodata)
 	return true;
 }
 
-inline void set_color(cairo_t* cr, color c)
+bool pc_set_default_colors(PaintContext* pc)
 {
-	cairo_set_source_rgba(cr, c.r, c.g, c.b, c.a);
+
+		if (!pc) {
+			error("Cannot set default colors, pc is NULL");
+			return false;
+		}
+
+		pc->foreground = BLACK;
+		pc->background = WHITE;
+
+		pc->hiColors[0] = get_color(1, 0, 0, 0.5);
+		pc->hiColors[1] = get_color(0, 1, 0, 0.5);
+		pc->hiColors[2] = get_color(0, 0, 1, 0.5);
+		pc->hiColors[3] = get_color(1, 1, 0, 0.3);
+		pc->hiColors[4] = get_color(1, 0, 1, 0.3);
+		pc->hiColors[5] = get_color(0, 1, 1, 0.3);
+		pc->hiColors[6] = get_color(0.2, 0.6, 0.8, 0.5);
+		pc->hiColors[7] = get_color(0.0, 0.3, 0.0, 0.7);
+
+		return true;
 }
