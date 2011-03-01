@@ -206,6 +206,55 @@ static PyObject* pyqrgen_enable_dont_draw_data(PyObject* self, PyObject* args)
 	Py_RETURN_FALSE;
 }
 
+static PyObject* pyqrgen_set_skipped_zones(PyObject* self, PyObject* args)
+{
+	int zones;
+	if (PyArg_ParseTuple(args, "i", &zones)) {
+		return PyBool_FromLong(pc_set_skipped_zones(pc, zones));
+	}
+	Py_RETURN_FALSE;
+}
+
+static PyObject* pyqrgen_skip_zone(PyObject* self, PyObject* args)
+{
+	int zone;
+	bool skip;
+	if (PyArg_ParseTuple(args, "i|i", &zone, &skip)) {
+		return PyBool_FromLong(pc_skip_zone(pc, zone, skip));
+	}
+	Py_RETURN_FALSE;
+}
+
+static PyObject* pyqrgen_set_highlighted_zones(PyObject* self, PyObject* args)
+{
+	int zones;
+	if (PyArg_ParseTuple(args, "i", &zones)) {
+		return PyBool_FromLong(pc_set_highlighted_zones(pc, zones));
+	}
+	Py_RETURN_FALSE;
+}
+
+static PyObject* pyqrgen_highlight_zone(PyObject* self, PyObject* args)
+{
+	int zone;
+	bool hi;
+	if (PyArg_ParseTuple(args, "i|i", &zone, &hi)) {
+		return PyBool_FromLong(pc_highlight_zone(pc, zone, hi));
+	}
+	Py_RETURN_FALSE;
+}
+
+static PyObject* pyqrgen_set_highlight_color(PyObject* self, PyObject* args)
+{
+	int zone;
+	double r,g,b,a;
+	if (PyArg_ParseTuple(args, "i|d|d|d|d", &zone, &r, &g, &b, &a)) {
+		color c = {r / USHRT_MAX, g / USHRT_MAX, b / USHRT_MAX, a / USHRT_MAX};
+		return PyBool_FromLong(pc_set_highlight_color(pc, zone, c));
+	}
+	Py_RETURN_FALSE;
+}
+
 static PyObject* pyqrgen_paint(PyObject* self, PyObject* args)
 {
 	paint_qrcode(si, pc);
@@ -239,6 +288,11 @@ static PyMethodDef QrgenMethods[] = {
 	{"drawRaster", pyqrgen_enable_draw_raster, METH_VARARGS, "Draw a raster."},
 	{"dontMask", pyqrgen_enable_dont_mask, METH_VARARGS, "Don't Mask the data."},
 	{"dontDrawData", pyqrgen_enable_dont_draw_data, METH_VARARGS, "Don't draw any data."},	
+	{"setSkippedZones", pyqrgen_set_skipped_zones, METH_VARARGS, "Set zones to be skipped."},
+	{"skipZone", pyqrgen_skip_zone, METH_VARARGS, "Set wheter to skip a zone."},
+	{"setHighlightedZones", pyqrgen_set_highlighted_zones, METH_VARARGS, "Set highlighted zones."},
+	{"highlightZone", pyqrgen_highlight_zone, METH_VARARGS, "Set whether to highlight a zone."},
+	{"setHighlightColor", pyqrgen_set_highlight_color, METH_VARARGS, "Set the color for a highlighted zone"},
 	
 	{"paint", pyqrgen_paint, METH_VARARGS, "Paint the symbol."},	
 

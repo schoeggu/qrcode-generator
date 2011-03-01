@@ -3,7 +3,7 @@ import pyqrgen
 
 import pygtk
 pygtk.require('2.0')
-import gtk, gobject, cairo
+import gtk, gobject, cairo, ctypes
 
 class Screen(gtk.DrawingArea):
 
@@ -94,6 +94,56 @@ class Win:
 		
 		elif widget == self.drawrasterbutton:
 			pyqrgen.drawRaster(self.drawrasterbutton.props.active)
+
+		elif widget == self.hlFinderbutton:
+			pyqrgen.highlightZone(1, self.hlFinderbutton.props.active)
+
+		elif widget == self.hlFindercolor:
+			pyqrgen.setHighlightColor(1, self.hlFindercolor.props.color.red, self.hlFindercolor.props.color.green, self.hlFindercolor.props.color.blue, self.hlFindercolor.props.alpha)
+		
+		elif widget == self.hlAligbutton:
+			pyqrgen.highlightZone(2, self.hlAligbutton.props.active)
+
+		elif widget == self.hlAligcolor:
+			pyqrgen.setHighlightColor(2, self.hlAligcolor.props.color.red, self.hlAligcolor.props.color.green, self.hlAligcolor.props.color.blue, self.hlAligcolor.props.alpha)
+		
+		elif widget == self.hlTimingbutton:
+			pyqrgen.highlightZone(4, self.hlTimingbutton.props.active)
+
+		elif widget == self.hlTimingcolor:
+			pyqrgen.setHighlightColor(4, self.hlTimingcolor.props.color.red, self.hlTimingcolor.props.color.green, self.hlTimingcolor.props.color.blue, self.hlTimingcolor.props.alpha)
+		
+		elif widget == self.hlDatabutton:
+			pyqrgen.highlightZone(8, self.hlDatabutton.props.active)
+
+		elif widget == self.hlDatacolor:
+			pyqrgen.setHighlightColor(8, self.hlDatacolor.props.color.red, self.hlDatacolor.props.color.green, self.hlDatacolor.props.color.blue, self.hlDatacolor.props.alpha)
+		
+		elif widget == self.hlECbutton:
+			pyqrgen.highlightZone(16, self.hlECbutton.props.active)
+
+		elif widget == self.hlECcolor:
+			pyqrgen.setHighlightColor(16, self.hlECcolor.props.color.red, self.hlECcolor.props.color.green, self.hlECcolor.props.color.blue, self.hlECcolor.props.alpha)
+		
+		elif widget == self.hlRembutton:
+			pyqrgen.highlightZone(32, self.hlRembutton.props.active)
+
+		elif widget == self.hlRemcolor:
+			pyqrgen.setHighlightColor(32, self.hlRemcolor.props.color.red, self.hlRemcolor.props.color.green, self.hlRemcolor.props.color.blue, self.hlRemcolor.props.alpha)
+		
+		elif widget == self.hlVersbutton:
+			pyqrgen.highlightZone(64, self.hlVersbutton.props.active)
+
+		elif widget == self.hlVerscolor:
+			pyqrgen.setHighlightColor(64, self.hlVerscolor.props.color.red, self.hlVerscolor.props.color.green, self.hlVerscolor.props.color.blue, self.hlVerscolor.props.alpha)
+		
+		elif widget == self.hlFormbutton:
+			pyqrgen.highlightZone(128, self.hlFormbutton.props.active)
+
+		elif widget == self.hlFormcolor:
+			pyqrgen.setHighlightColor(128, self.hlFormcolor.props.color.red, self.hlFormcolor.props.color.green, self.hlFormcolor.props.color.blue, self.hlFormcolor.props.alpha)
+		
+		
 		
 		
 		self.redraw_qr()
@@ -192,7 +242,7 @@ class Win:
 		return frame
 	
 	def getDebugPane(self):
-		detailstable = gtk.Table(4, 2, False)
+		detailstable = gtk.Table(10, 3, False)
 		detailstable.set_row_spacings(2)
 		detailstable.set_col_spacings(2)
 
@@ -202,7 +252,7 @@ class Win:
 		self.nomaskbutton = gtk.CheckButton(None, False)
 		self.nomaskbutton.connect("toggled", self.pcchanged)
 		detailstable.attach(nomaskalign, 0, 1, 1, 2, gtk.FILL, gtk.FILL, 2, 0)
-		detailstable.attach(self.nomaskbutton, 1, 2, 1, 2, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+		detailstable.attach(self.nomaskbutton, 1, 3, 1, 2, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 	
 		nodatalabel = gtk.Label("Don't paint data")
 		nodataalign = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
@@ -210,7 +260,7 @@ class Win:
 		self.nodatabutton = gtk.CheckButton(None, False)
 		self.nodatabutton.connect("toggled", self.pcchanged)
 		detailstable.attach(nodataalign, 0, 1, 2, 3, gtk.FILL, gtk.FILL, 2, 0)
-		detailstable.attach(self.nodatabutton, 1, 2, 2, 3, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+		detailstable.attach(self.nodatabutton, 1, 3, 2, 3, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 
 		drawrasterlabel = gtk.Label("Draw raster")
 		drawrasteralign = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
@@ -218,7 +268,116 @@ class Win:
 		self.drawrasterbutton = gtk.CheckButton(None, False)
 		self.drawrasterbutton.connect("toggled", self.pcchanged)
 		detailstable.attach(drawrasteralign, 0, 1, 3, 4, gtk.FILL, gtk.FILL, 2, 0)
-		detailstable.attach(self.drawrasterbutton, 1, 2, 3, 4, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+		detailstable.attach(self.drawrasterbutton, 1, 3, 3, 4, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+
+		hlseparator = gtk.HSeparator()
+		hlLabel = gtk.Label("Highlight Zones:")
+		detailstable.attach(hlseparator, 0, 3, 4, 5, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 2, 0)
+		detailstable.attach(hlLabel, 0, 3, 5, 6, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 2, 0)
+
+		hlFinder = gtk.Label("Finder Pattern:")
+		hlFinderA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		hlFinderA.add(hlFinder)
+		self.hlFinderbutton = gtk.CheckButton(None, False)
+		self.hlFinderbutton.connect("toggled", self.pcchanged)
+		self.hlFindercolor = gtk.ColorButton(gtk.gdk.color_parse("#FF0000"))
+		self.hlFindercolor.set_use_alpha(True)
+		self.hlFindercolor.props.alpha = self.half
+		self.hlFindercolor.connect("color-set", self.pcchanged)
+		detailstable.attach(hlFinderA, 0, 1, 6, 7, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(self.hlFinderbutton, 1, 2, 6, 7, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlFindercolor, 2, 3, 6, 7, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+	
+		hlAlig = gtk.Label("Alignment Pattern:")
+		hlAligA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		hlAligA.add(hlAlig)
+		self.hlAligbutton = gtk.CheckButton(None, False)
+		self.hlAligbutton.connect("toggled", self.pcchanged)
+		self.hlAligcolor = gtk.ColorButton(gtk.gdk.color_parse("#00FF00"))
+		self.hlAligcolor.set_use_alpha(True)
+		self.hlAligcolor.props.alpha = self.half
+		self.hlAligcolor.connect("color-set", self.pcchanged)
+		detailstable.attach(hlAligA, 0, 1, 7, 8, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(self.hlAligbutton, 1, 2, 7, 8, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlAligcolor, 2, 3, 7, 8, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+	
+		hlTiming = gtk.Label("Timing Pattern:")
+		hlTimingA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		hlTimingA.add(hlTiming)
+		self.hlTimingbutton = gtk.CheckButton(None, False)
+		self.hlTimingbutton.connect("toggled", self.pcchanged)
+		self.hlTimingcolor = gtk.ColorButton(gtk.gdk.color_parse("#0000FF"))
+		self.hlTimingcolor.set_use_alpha(True)
+		self.hlTimingcolor.props.alpha = self.half
+		self.hlTimingcolor.connect("color-set", self.pcchanged)
+		detailstable.attach(hlTimingA, 0, 1, 8, 9, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(self.hlTimingbutton, 1, 2, 8, 9, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlTimingcolor, 2, 3, 8, 9, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+	
+		hlData = gtk.Label("Data:")
+		hlDataA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		hlDataA.add(hlData)
+		self.hlDatabutton = gtk.CheckButton(None, False)
+		self.hlDatabutton.connect("toggled", self.pcchanged)
+		self.hlDatacolor = gtk.ColorButton(gtk.gdk.color_parse("#00FFFF"))
+		self.hlDatacolor.set_use_alpha(True)
+		self.hlDatacolor.props.alpha = self.half
+		self.hlDatacolor.connect("color-set", self.pcchanged)
+		detailstable.attach(hlDataA, 0, 1, 9, 10, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(self.hlDatabutton, 1, 2, 9, 10, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlDatacolor, 2, 3, 9, 10, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+	
+		hlEC = gtk.Label("Error Correction:")
+		hlECA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		hlECA.add(hlEC)
+		self.hlECbutton = gtk.CheckButton(None, False)
+		self.hlECbutton.connect("toggled", self.pcchanged)
+		self.hlECcolor = gtk.ColorButton(gtk.gdk.color_parse("#FF00FF"))
+		self.hlECcolor.set_use_alpha(True)
+		self.hlECcolor.props.alpha = self.half
+		self.hlECcolor.connect("color-set", self.pcchanged)
+		detailstable.attach(hlECA, 0, 1, 10, 11, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(self.hlECbutton, 1, 2, 10, 11, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlECcolor, 2, 3, 10, 11, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+	
+		hlRem = gtk.Label("Remainder Bits:")
+		hlRemA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		hlRemA.add(hlRem)
+		self.hlRembutton = gtk.CheckButton(None, False)
+		self.hlRembutton.connect("toggled", self.pcchanged)
+		self.hlRemcolor = gtk.ColorButton(gtk.gdk.color_parse("#FFC040"))
+		self.hlRemcolor.set_use_alpha(True)
+		self.hlRemcolor.props.alpha = self.half / 2 * 3
+		self.hlRemcolor.connect("color-set", self.pcchanged)
+		detailstable.attach(hlRemA, 0, 1, 11, 12, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(self.hlRembutton, 1, 2, 11, 12, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlRemcolor, 2, 3, 11, 12, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+	
+		hlVers = gtk.Label("Version Info:")
+		hlVersA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		hlVersA.add(hlVers)
+		self.hlVersbutton = gtk.CheckButton(None, False)
+		self.hlVersbutton.connect("toggled", self.pcchanged)
+		self.hlVerscolor = gtk.ColorButton(gtk.gdk.color_parse("#FF8000"))
+		self.hlVerscolor.set_use_alpha(True)
+		self.hlVerscolor.props.alpha = self.half / 2 * 3
+		self.hlVerscolor.connect("color-set", self.pcchanged)
+		detailstable.attach(hlVersA, 0, 1, 12, 13, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(self.hlVersbutton, 1, 2, 12, 13, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlVerscolor, 2, 3, 12, 13, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+	
+		hlForm = gtk.Label("Format Info:")
+		hlFormA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		hlFormA.add(hlForm)
+		self.hlFormbutton = gtk.CheckButton(None, False)
+		self.hlFormbutton.connect("toggled", self.pcchanged)
+		self.hlFormcolor = gtk.ColorButton(gtk.gdk.color_parse("#FFFF00"))
+		self.hlFormcolor.set_use_alpha(True)
+		self.hlFormcolor.props.alpha = self.half / 2 * 3
+		self.hlFormcolor.connect("color-set", self.pcchanged)
+		detailstable.attach(hlFormA, 0, 1, 13, 14, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(self.hlFormbutton, 1, 2, 13, 14, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlFormcolor, 2, 3, 13, 14, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 	
 	
 		frame = ExpanderFrame(detailstable, "Debug Settings")
@@ -271,6 +430,8 @@ class Win:
 	
 	def __init__(self):
 		self.generated = False
+
+		self.half = 32767 #50% alpha
 
 		self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 

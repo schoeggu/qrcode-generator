@@ -289,7 +289,9 @@ bool pc_set_highlight_color(PaintContext* pc, int zone, color c)
 	}
 
 	int index = 0;
-	while (!(zone>>index & 1)) index++;
+
+	while (!(zone>>index & 1)) { index++;}
+
 	pc->hiColors[index] = c;
 
 	return true;
@@ -367,11 +369,11 @@ bool pc_set_default_colors(PaintContext* pc)
 		pc->hiColors[0] = get_color(1, 0, 0, 0.5);
 		pc->hiColors[1] = get_color(0, 1, 0, 0.5);
 		pc->hiColors[2] = get_color(0, 0, 1, 0.5);
-		pc->hiColors[3] = get_color(1, 1, 0, 0.3);
-		pc->hiColors[4] = get_color(1, 0, 1, 0.3);
-		pc->hiColors[5] = get_color(0, 1, 1, 0.3);
-		pc->hiColors[6] = get_color(0.2, 0.6, 0.8, 0.5);
-		pc->hiColors[7] = get_color(0.0, 0.3, 0.0, 0.7);
+		pc->hiColors[3] = get_color(0, 1, 1, 0.5);
+		pc->hiColors[4] = get_color(1, 0, 1, 0.5);
+		pc->hiColors[5] = get_color(1, 0.75, 0.25, 0.75);
+		pc->hiColors[6] = get_color(1, 0.5, 0, 0.75);
+		pc->hiColors[7] = get_color(1., 1, 0.0, 0.75);
 
 		return true;
 }

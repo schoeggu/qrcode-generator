@@ -410,8 +410,9 @@ void drawBit(const PaintContext* pc, const SymbolInfo* si, int x, int y)
 		int pixel = 0;
 		
 		if (idx < si->totalCodeWords && (!(pc->noData))) {
-			pixel = (si->encodedData[idx] >> bitNum--);
+			pixel = (si->encodedData[idx] >> bitNum);
 		}
+		bitNum--; /* also decrement when not drawing data, needed for correct highlighting */
 		
 		if (!skip(pc, ((idx < si->dataCodeWords) ? QR_DATA : ((idx < si->totalCodeWords) ? QR_EC : QR_REMAINDER)))) {
 			if (applyMask(pixel, x, y, (pc->noMask) ? MASK_NONE : si->mask) & 1) {

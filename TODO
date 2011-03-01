@@ -8,11 +8,13 @@ Things Todo:
 	- Make them work on windows, linux and os x
 	- Discover if there is no gtk+-2.0 and then don't build -w support in sample program.
 
-- Create an gui example program
+- With some sizes, there are white lines between the data modules
 
-- Python bindings
+- make Python bindings more object oriented
 
 - Create man pages for programs and headers
+
+- Create doxygen or other documentation
 
 - Support other graphic libraries than cairo.
 
