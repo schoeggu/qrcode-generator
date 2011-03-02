@@ -163,13 +163,13 @@ class Win:
 		elif widget == self.ec:
 			e = self.get_active_text(self.ec)
 			ecl = 4
-			if e == "L":
+			if e == "L (7%)":
 				ecl= 1
-			elif e == "M":
+			elif e == "M (15%)":
 				ecl = 0
-			elif e == "Q":
+			elif e == "Q (25%)":
 				ecl = 3
-			elif e == "H":
+			elif e == "H (30%)":
 				ecl = 2
 			pyqrgen.setEcLevel(ecl)
 			
@@ -415,10 +415,10 @@ class Win:
 		ecalig = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
 		ecalig.add(eclabel)
 		self.ec = gtk.combo_box_new_text()
-		self.ec.append_text("L")
-		self.ec.append_text("M")
-		self.ec.append_text("Q")
-		self.ec.append_text("H")
+		self.ec.append_text("L (7%)")
+		self.ec.append_text("M (15%)")
+		self.ec.append_text("Q (25%)")
+		self.ec.append_text("H (30%)")
 		self.ec.set_active(1)
 		self.ec.connect("changed", self.sichanged)
 		detailstable.attach(ecalig, 0, 1, 2, 3, gtk.FILL, gtk.FILL, 2, 0)
