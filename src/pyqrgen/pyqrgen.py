@@ -77,7 +77,7 @@ class Win:
 	
 	def pcchanged(self, widget):
 			
-		ok = True
+		ok = False
 		if widget == self.quietbutton:
 			ok = pyqrgen.drawQuietZone(self.quietbutton.props.active)
 			
@@ -149,7 +149,7 @@ class Win:
 		
 	def sichanged(self, widget):
 
-		ok = True
+		ok = False
 		if widget == self.button1:
 			ok = pyqrgen.setData(self.entry.get_text(), len(self.entry.get_text()))
 			self.generated = True
@@ -183,6 +183,10 @@ class Win:
 			elif m == "Alphanumeric":
 				md = 2
 			ok = pyqrgen.setMode(md)
+
+		elif widget == self.entry:
+			if self.repaintWhileTypingbutton.props.active: 
+				ok = pyqrgen.setData(self.entry.get_text(), len(self.entry.get_text()))
 			
 		if ok == True:
 			self.regen_qr()
@@ -220,14 +224,21 @@ class Win:
 		detailstable.attach(quietalign, 0, 1, 1, 2, gtk.FILL, gtk.FILL, 2, 0)
 		detailstable.attach(self.quietbutton, 1, 2, 1, 2, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 		
+		repaintWhileTypinglabel = gtk.Label("Live update")
+		repaintWhileTypingalign = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		repaintWhileTypingalign.add(repaintWhileTypinglabel)
+		self.repaintWhileTypingbutton = gtk.CheckButton(None, False)
+		detailstable.attach(repaintWhileTypingalign, 0, 1, 2, 3, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(self.repaintWhileTypingbutton, 1, 2, 2, 3, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+		
 		foregroundlabel = gtk.Label("Foreground")
 		forealign = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
 		forealign.add(foregroundlabel)
 		self.forebutton = gtk.ColorButton(gtk.gdk.Color(0,0,0))
 		self.forebutton.set_use_alpha(True)
 		self.forebutton.connect("color-set", self.pcchanged)
-		detailstable.attach(forealign, 0, 1, 2, 3, gtk.FILL, gtk.FILL, 2, 0)
-		detailstable.attach(self.forebutton, 1, 2, 2, 3, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+		detailstable.attach(forealign, 0, 1, 3, 4, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(self.forebutton, 1, 2, 3, 4, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 		
 		backgroundlabel = gtk.Label("Background")
 		backalign = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
@@ -235,8 +246,8 @@ class Win:
 		self.backbutton = gtk.ColorButton(gtk.gdk.Color(-1,-1,-1)) # -1 overflows to uint_max
 		self.backbutton.set_use_alpha(True)
 		self.backbutton.connect("color-set", self.pcchanged)
-		detailstable.attach(backalign, 0, 1, 3, 4, gtk.FILL, gtk.FILL, 2, 0)
-		detailstable.attach(self.backbutton, 1, 2, 3, 4, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+		detailstable.attach(backalign, 0, 1, 4, 5, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(self.backbutton, 1, 2, 4, 5, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 		
 		frame = ExpanderFrame(detailstable, "Advanced Settings")
 		
