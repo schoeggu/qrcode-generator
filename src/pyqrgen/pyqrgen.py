@@ -72,93 +72,93 @@ class Win:
 			self.screen.redraw()
 	
 	def regen_qr(self):
-		pyqrgen.encode()
-		self.redraw_qr()
+		if pyqrgen.encode() == True:
+			self.redraw_qr()
 	
 	def pcchanged(self, widget):
 			
+		ok = True
 		if widget == self.quietbutton:
-			pyqrgen.drawQuietZone(self.quietbutton.props.active)
+			ok = pyqrgen.drawQuietZone(self.quietbutton.props.active)
 			
 		elif widget == self.forebutton:
-			pyqrgen.setForegroundColor(self.forebutton.props.color.red, self.forebutton.props.color.green, self.forebutton.props.color.blue, self.forebutton.props.alpha)
+			ok = pyqrgen.setForegroundColor(self.forebutton.props.color.red, self.forebutton.props.color.green, self.forebutton.props.color.blue, self.forebutton.props.alpha)
 			
 		elif widget == self.backbutton:
-			pyqrgen.setBackgroundColor(self.backbutton.props.color.red, self.backbutton.props.color.green, self.backbutton.props.color.blue, self.backbutton.props.alpha)
+			ok = pyqrgen.setBackgroundColor(self.backbutton.props.color.red, self.backbutton.props.color.green, self.backbutton.props.color.blue, self.backbutton.props.alpha)
 
 		elif widget == self.nomaskbutton:
-			pyqrgen.dontMask(self.nomaskbutton.props.active)
+			ok = pyqrgen.dontMask(self.nomaskbutton.props.active)
 		
 		elif widget == self.nodatabutton:
-			pyqrgen.dontDrawData(self.nodatabutton.props.active)
+			ok = pyqrgen.dontDrawData(self.nodatabutton.props.active)
 		
 		elif widget == self.drawrasterbutton:
-			pyqrgen.drawRaster(self.drawrasterbutton.props.active)
+			ok = pyqrgen.drawRaster(self.drawrasterbutton.props.active)
 
 		elif widget == self.hlFinderbutton:
-			pyqrgen.highlightZone(1, self.hlFinderbutton.props.active)
+			ok = pyqrgen.highlightZone(1, self.hlFinderbutton.props.active)
 
 		elif widget == self.hlFindercolor:
-			pyqrgen.setHighlightColor(1, self.hlFindercolor.props.color.red, self.hlFindercolor.props.color.green, self.hlFindercolor.props.color.blue, self.hlFindercolor.props.alpha)
+			ok = pyqrgen.setHighlightColor(1, self.hlFindercolor.props.color.red, self.hlFindercolor.props.color.green, self.hlFindercolor.props.color.blue, self.hlFindercolor.props.alpha)
 		
 		elif widget == self.hlAligbutton:
-			pyqrgen.highlightZone(2, self.hlAligbutton.props.active)
+			ok = pyqrgen.highlightZone(2, self.hlAligbutton.props.active)
 
 		elif widget == self.hlAligcolor:
-			pyqrgen.setHighlightColor(2, self.hlAligcolor.props.color.red, self.hlAligcolor.props.color.green, self.hlAligcolor.props.color.blue, self.hlAligcolor.props.alpha)
+			ok = pyqrgen.setHighlightColor(2, self.hlAligcolor.props.color.red, self.hlAligcolor.props.color.green, self.hlAligcolor.props.color.blue, self.hlAligcolor.props.alpha)
 		
 		elif widget == self.hlTimingbutton:
-			pyqrgen.highlightZone(4, self.hlTimingbutton.props.active)
+			ok = pyqrgen.highlightZone(4, self.hlTimingbutton.props.active)
 
 		elif widget == self.hlTimingcolor:
-			pyqrgen.setHighlightColor(4, self.hlTimingcolor.props.color.red, self.hlTimingcolor.props.color.green, self.hlTimingcolor.props.color.blue, self.hlTimingcolor.props.alpha)
+			ok = pyqrgen.setHighlightColor(4, self.hlTimingcolor.props.color.red, self.hlTimingcolor.props.color.green, self.hlTimingcolor.props.color.blue, self.hlTimingcolor.props.alpha)
 		
 		elif widget == self.hlDatabutton:
-			pyqrgen.highlightZone(8, self.hlDatabutton.props.active)
+			ok = pyqrgen.highlightZone(8, self.hlDatabutton.props.active)
 
 		elif widget == self.hlDatacolor:
-			pyqrgen.setHighlightColor(8, self.hlDatacolor.props.color.red, self.hlDatacolor.props.color.green, self.hlDatacolor.props.color.blue, self.hlDatacolor.props.alpha)
+			ok = pyqrgen.setHighlightColor(8, self.hlDatacolor.props.color.red, self.hlDatacolor.props.color.green, self.hlDatacolor.props.color.blue, self.hlDatacolor.props.alpha)
 		
 		elif widget == self.hlECbutton:
-			pyqrgen.highlightZone(16, self.hlECbutton.props.active)
+			ok = pyqrgen.highlightZone(16, self.hlECbutton.props.active)
 
 		elif widget == self.hlECcolor:
-			pyqrgen.setHighlightColor(16, self.hlECcolor.props.color.red, self.hlECcolor.props.color.green, self.hlECcolor.props.color.blue, self.hlECcolor.props.alpha)
+			ok = pyqrgen.setHighlightColor(16, self.hlECcolor.props.color.red, self.hlECcolor.props.color.green, self.hlECcolor.props.color.blue, self.hlECcolor.props.alpha)
 		
 		elif widget == self.hlRembutton:
-			pyqrgen.highlightZone(32, self.hlRembutton.props.active)
+			ok = pyqrgen.highlightZone(32, self.hlRembutton.props.active)
 
 		elif widget == self.hlRemcolor:
-			pyqrgen.setHighlightColor(32, self.hlRemcolor.props.color.red, self.hlRemcolor.props.color.green, self.hlRemcolor.props.color.blue, self.hlRemcolor.props.alpha)
+			ok = pyqrgen.setHighlightColor(32, self.hlRemcolor.props.color.red, self.hlRemcolor.props.color.green, self.hlRemcolor.props.color.blue, self.hlRemcolor.props.alpha)
 		
 		elif widget == self.hlVersbutton:
-			pyqrgen.highlightZone(64, self.hlVersbutton.props.active)
+			ok = pyqrgen.highlightZone(64, self.hlVersbutton.props.active)
 
 		elif widget == self.hlVerscolor:
-			pyqrgen.setHighlightColor(64, self.hlVerscolor.props.color.red, self.hlVerscolor.props.color.green, self.hlVerscolor.props.color.blue, self.hlVerscolor.props.alpha)
+			ok = pyqrgen.setHighlightColor(64, self.hlVerscolor.props.color.red, self.hlVerscolor.props.color.green, self.hlVerscolor.props.color.blue, self.hlVerscolor.props.alpha)
 		
 		elif widget == self.hlFormbutton:
-			pyqrgen.highlightZone(128, self.hlFormbutton.props.active)
+			ok = pyqrgen.highlightZone(128, self.hlFormbutton.props.active)
 
 		elif widget == self.hlFormcolor:
-			pyqrgen.setHighlightColor(128, self.hlFormcolor.props.color.red, self.hlFormcolor.props.color.green, self.hlFormcolor.props.color.blue, self.hlFormcolor.props.alpha)
+			ok = pyqrgen.setHighlightColor(128, self.hlFormcolor.props.color.red, self.hlFormcolor.props.color.green, self.hlFormcolor.props.color.blue, self.hlFormcolor.props.alpha)
 		
-		
-		
-		
-		self.redraw_qr()
+		if ok == True:
+			self.redraw_qr()
 		
 	def sichanged(self, widget):
 
+		ok = True
 		if widget == self.button1:
-			pyqrgen.setData(self.entry.get_text(), len(self.entry.get_text()))
+			ok = pyqrgen.setData(self.entry.get_text(), len(self.entry.get_text()))
 			self.generated = True
 
 		elif widget == self.maskspinner:
-			pyqrgen.setMask(int(self.maskspinner.props.value)-1)
+			ok = pyqrgen.setMask(int(self.maskspinner.props.value)-1)
 			
 		elif widget == self.verspinner:
-			pyqrgen.setVersion(int(self.verspinner.props.value))
+			ok = pyqrgen.setVersion(int(self.verspinner.props.value))
 			
 		elif widget == self.ec:
 			e = self.get_active_text(self.ec)
@@ -171,7 +171,7 @@ class Win:
 				ecl = 3
 			elif e == "H (30%)":
 				ecl = 2
-			pyqrgen.setEcLevel(ecl)
+			ok = pyqrgen.setEcLevel(ecl)
 			
 		elif widget == self.mode:
 			m = self.get_active_text(self.mode)
@@ -182,9 +182,10 @@ class Win:
 				md = 1
 			elif m == "Alphanumeric":
 				md = 2
-			pyqrgen.setMode(md)
+			ok = pyqrgen.setMode(md)
 			
-		self.regen_qr()
+		if ok == True:
+			self.regen_qr()
 		
 	def output(self, widget):
 		if widget == self.verspinner and self.verspinner.props.value == 0:
@@ -450,6 +451,7 @@ class Win:
 		self.genbox = gtk.HBox(False, 0)
 		self.entry = gtk.Entry()
 		self.entry.set_text("green pride")
+		self.entry.connect("changed", self.sichanged)
 		self.button1 = gtk.Button("Generate")
 		self.button1.connect("clicked", self.sichanged)
 		self.genbox.pack_start(self.button1, False, False, 0)

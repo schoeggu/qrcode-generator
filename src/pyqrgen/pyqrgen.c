@@ -77,9 +77,8 @@ static PyObject* pyqrgen_set_auto_mask(PyObject* self, PyObject* args)
 
 static PyObject* pyqrgen_encode(PyObject* self, PyObject* args)
 {
-	si_encode(si);
-	Py_INCREF(Py_None);
-	return Py_None;
+	return PyBool_FromLong(si_encode(si));
+
 }
 
 static PyObject* pyqrgen_set_cairo_context(PyObject* self, PyObject* args)
