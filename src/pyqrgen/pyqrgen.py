@@ -411,7 +411,7 @@ class Win:
 		detailstable.attach(versalign, 0, 1, 0, 1, gtk.FILL, gtk.FILL, 2, 0)
 		detailstable.attach(self.verspinner, 1, 2, 0, 1, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 		
-		modelabel = gtk.Label("Enocde Mode")
+		modelabel = gtk.Label("Encode Mode")
 		modealig = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
 		modealig.add(modelabel)
 		self.mode =  gtk.combo_box_new_text()
