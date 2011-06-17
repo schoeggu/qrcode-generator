@@ -1,9 +1,18 @@
-#! /usr/bin/env python
+#! /opt/local/bin/python2.7
+
+
+import sys
+import os.path
+pygtklibdir = os.path.join("/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib", "pygtk", "2.0")
+sys.path.insert(0, pygtklibdir)
+sys.path.insert(0, ".")
+
 import pyqrgen
 
 import pygtk
 pygtk.require('2.0')
-import gtk, gobject, cairo, ctypes
+import cairo
+import gtk, gobject, ctypes
 
 class Screen(gtk.DrawingArea):
 
@@ -17,7 +26,6 @@ class Screen(gtk.DrawingArea):
 
 		scaleW = float(event.area.width)/self.surfaceSize
 		scaleH = float(event.area.height)/self.surfaceSize
-		
 
 		cr.scale(scaleW, scaleH)
 
@@ -99,11 +107,17 @@ class Win:
 		elif widget == self.hlFinderbutton:
 			ok = pyqrgen.highlightZone(1, self.hlFinderbutton.props.active)
 
+		elif widget == self.skipFinderbutton:
+			ok = pyqrgen.skipZone(1, self.skipFinderbutton.props.active)
+
 		elif widget == self.hlFindercolor:
 			ok = pyqrgen.setHighlightColor(1, self.hlFindercolor.props.color.red, self.hlFindercolor.props.color.green, self.hlFindercolor.props.color.blue, self.hlFindercolor.props.alpha)
 		
 		elif widget == self.hlAligbutton:
 			ok = pyqrgen.highlightZone(2, self.hlAligbutton.props.active)
+
+		elif widget == self.skipAligbutton:
+			ok = pyqrgen.skipZone(2, self.skipAligbutton.props.active)
 
 		elif widget == self.hlAligcolor:
 			ok = pyqrgen.setHighlightColor(2, self.hlAligcolor.props.color.red, self.hlAligcolor.props.color.green, self.hlAligcolor.props.color.blue, self.hlAligcolor.props.alpha)
@@ -111,11 +125,17 @@ class Win:
 		elif widget == self.hlTimingbutton:
 			ok = pyqrgen.highlightZone(4, self.hlTimingbutton.props.active)
 
+		elif widget == self.skipTimingbutton:
+			ok = pyqrgen.skipZone(4, self.skipTimingbutton.props.active)
+
 		elif widget == self.hlTimingcolor:
 			ok = pyqrgen.setHighlightColor(4, self.hlTimingcolor.props.color.red, self.hlTimingcolor.props.color.green, self.hlTimingcolor.props.color.blue, self.hlTimingcolor.props.alpha)
 		
 		elif widget == self.hlDatabutton:
 			ok = pyqrgen.highlightZone(8, self.hlDatabutton.props.active)
+
+		elif widget == self.skipDatabutton:
+			ok = pyqrgen.skipZone(8, self.skipDatabutton.props.active)
 
 		elif widget == self.hlDatacolor:
 			ok = pyqrgen.setHighlightColor(8, self.hlDatacolor.props.color.red, self.hlDatacolor.props.color.green, self.hlDatacolor.props.color.blue, self.hlDatacolor.props.alpha)
@@ -123,11 +143,17 @@ class Win:
 		elif widget == self.hlECbutton:
 			ok = pyqrgen.highlightZone(16, self.hlECbutton.props.active)
 
+		elif widget == self.skipECbutton:
+			ok = pyqrgen.skipZone(16, self.skipECbutton.props.active)
+
 		elif widget == self.hlECcolor:
 			ok = pyqrgen.setHighlightColor(16, self.hlECcolor.props.color.red, self.hlECcolor.props.color.green, self.hlECcolor.props.color.blue, self.hlECcolor.props.alpha)
 		
 		elif widget == self.hlRembutton:
 			ok = pyqrgen.highlightZone(32, self.hlRembutton.props.active)
+
+		elif widget == self.skipRembutton:
+			ok = pyqrgen.skipZone(32, self.skipRembutton.props.active)
 
 		elif widget == self.hlRemcolor:
 			ok = pyqrgen.setHighlightColor(32, self.hlRemcolor.props.color.red, self.hlRemcolor.props.color.green, self.hlRemcolor.props.color.blue, self.hlRemcolor.props.alpha)
@@ -135,11 +161,17 @@ class Win:
 		elif widget == self.hlVersbutton:
 			ok = pyqrgen.highlightZone(64, self.hlVersbutton.props.active)
 
+		elif widget == self.skipVersbutton:
+			ok = pyqrgen.skipZone(64, self.skipVersbutton.props.active)
+
 		elif widget == self.hlVerscolor:
 			ok = pyqrgen.setHighlightColor(64, self.hlVerscolor.props.color.red, self.hlVerscolor.props.color.green, self.hlVerscolor.props.color.blue, self.hlVerscolor.props.alpha)
 		
 		elif widget == self.hlFormbutton:
 			ok = pyqrgen.highlightZone(128, self.hlFormbutton.props.active)
+
+		elif widget == self.skipFormbutton:
+			ok = pyqrgen.skipZone(128, self.skipFormbutton.props.active)
 
 		elif widget == self.hlFormcolor:
 			ok = pyqrgen.setHighlightColor(128, self.hlFormcolor.props.color.red, self.hlFormcolor.props.color.green, self.hlFormcolor.props.color.blue, self.hlFormcolor.props.alpha)
@@ -159,6 +191,7 @@ class Win:
 			
 		elif widget == self.verspinner:
 			ok = pyqrgen.setVersion(int(self.verspinner.props.value))
+			print ok
 			
 		elif widget == self.ec:
 			e = self.get_active_text(self.ec)
@@ -254,7 +287,7 @@ class Win:
 		return frame
 	
 	def getDebugPane(self):
-		detailstable = gtk.Table(10, 3, False)
+		detailstable = gtk.Table(10, 4, False)
 		detailstable.set_row_spacings(2)
 		detailstable.set_col_spacings(2)
 
@@ -283,113 +316,151 @@ class Win:
 		detailstable.attach(self.drawrasterbutton, 1, 3, 3, 4, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 
 		hlseparator = gtk.HSeparator()
-		hlLabel = gtk.Label("Highlight Zones:")
+		zLabel = gtk.Label("Zones")
+		sLabel = gtk.Label("Skip")
+		hLabel = gtk.Label("Highlight")
+		cLabel = gtk.Label("Color")
+		zlA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		slA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		hlA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		clA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
+		zlA.add(zLabel)
+		slA.add(sLabel)
+		hlA.add(hLabel)
+		clA.add(cLabel)
 		detailstable.attach(hlseparator, 0, 3, 4, 5, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 2, 0)
-		detailstable.attach(hlLabel, 0, 3, 5, 6, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 2, 0)
+		detailstable.attach(zlA, 0, 1, 5, 6, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(slA, 1, 2, 5, 6, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(hlA, 2, 3, 5, 6, gtk.FILL, gtk.FILL, 2, 0)
+		detailstable.attach(clA, 3, 4, 5, 6, gtk.FILL, gtk.FILL, 2, 0)
 
 		hlFinder = gtk.Label("Finder Pattern:")
 		hlFinderA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
 		hlFinderA.add(hlFinder)
 		self.hlFinderbutton = gtk.CheckButton(None, False)
 		self.hlFinderbutton.connect("toggled", self.pcchanged)
+		self.skipFinderbutton = gtk.CheckButton(None, False)
+		self.skipFinderbutton.connect("toggled", self.pcchanged)
 		self.hlFindercolor = gtk.ColorButton(gtk.gdk.color_parse("#FF0000"))
 		self.hlFindercolor.set_use_alpha(True)
 		self.hlFindercolor.props.alpha = self.half
 		self.hlFindercolor.connect("color-set", self.pcchanged)
 		detailstable.attach(hlFinderA, 0, 1, 6, 7, gtk.FILL, gtk.FILL, 2, 0)
-		detailstable.attach(self.hlFinderbutton, 1, 2, 6, 7, gtk.FILL, gtk.FILL, 0, 0)
-		detailstable.attach(self.hlFindercolor, 2, 3, 6, 7, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+		detailstable.attach(self.skipFinderbutton, 1, 2, 6, 7, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlFinderbutton, 2, 3, 6, 7, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlFindercolor, 3, 4, 6, 7, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 	
 		hlAlig = gtk.Label("Alignment Pattern:")
 		hlAligA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
 		hlAligA.add(hlAlig)
 		self.hlAligbutton = gtk.CheckButton(None, False)
 		self.hlAligbutton.connect("toggled", self.pcchanged)
+		self.skipAligbutton = gtk.CheckButton(None, False)
+		self.skipAligbutton.connect("toggled", self.pcchanged)
 		self.hlAligcolor = gtk.ColorButton(gtk.gdk.color_parse("#00FF00"))
 		self.hlAligcolor.set_use_alpha(True)
 		self.hlAligcolor.props.alpha = self.half
 		self.hlAligcolor.connect("color-set", self.pcchanged)
 		detailstable.attach(hlAligA, 0, 1, 7, 8, gtk.FILL, gtk.FILL, 2, 0)
-		detailstable.attach(self.hlAligbutton, 1, 2, 7, 8, gtk.FILL, gtk.FILL, 0, 0)
-		detailstable.attach(self.hlAligcolor, 2, 3, 7, 8, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+		detailstable.attach(self.skipAligbutton, 1, 2, 7, 8, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlAligbutton, 2, 3, 7, 8, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlAligcolor, 3, 4, 7, 8, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 	
 		hlTiming = gtk.Label("Timing Pattern:")
 		hlTimingA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
 		hlTimingA.add(hlTiming)
 		self.hlTimingbutton = gtk.CheckButton(None, False)
 		self.hlTimingbutton.connect("toggled", self.pcchanged)
+		self.skipTimingbutton = gtk.CheckButton(None, False)
+		self.skipTimingbutton.connect("toggled", self.pcchanged)
 		self.hlTimingcolor = gtk.ColorButton(gtk.gdk.color_parse("#0000FF"))
 		self.hlTimingcolor.set_use_alpha(True)
 		self.hlTimingcolor.props.alpha = self.half
 		self.hlTimingcolor.connect("color-set", self.pcchanged)
 		detailstable.attach(hlTimingA, 0, 1, 8, 9, gtk.FILL, gtk.FILL, 2, 0)
-		detailstable.attach(self.hlTimingbutton, 1, 2, 8, 9, gtk.FILL, gtk.FILL, 0, 0)
-		detailstable.attach(self.hlTimingcolor, 2, 3, 8, 9, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+		detailstable.attach(self.skipTimingbutton, 1, 2, 8, 9, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlTimingbutton, 2, 3, 8, 9, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlTimingcolor, 3, 4, 8, 9, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 	
 		hlData = gtk.Label("Data:")
 		hlDataA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
 		hlDataA.add(hlData)
 		self.hlDatabutton = gtk.CheckButton(None, False)
 		self.hlDatabutton.connect("toggled", self.pcchanged)
+		self.skipDatabutton = gtk.CheckButton(None, False)
+		self.skipDatabutton.connect("toggled", self.pcchanged)
 		self.hlDatacolor = gtk.ColorButton(gtk.gdk.color_parse("#00FFFF"))
 		self.hlDatacolor.set_use_alpha(True)
 		self.hlDatacolor.props.alpha = self.half
 		self.hlDatacolor.connect("color-set", self.pcchanged)
 		detailstable.attach(hlDataA, 0, 1, 9, 10, gtk.FILL, gtk.FILL, 2, 0)
-		detailstable.attach(self.hlDatabutton, 1, 2, 9, 10, gtk.FILL, gtk.FILL, 0, 0)
-		detailstable.attach(self.hlDatacolor, 2, 3, 9, 10, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+		detailstable.attach(self.skipDatabutton, 1, 2, 9, 10, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlDatabutton, 2, 3, 9, 10, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlDatacolor, 3, 4, 9, 10, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 	
 		hlEC = gtk.Label("Error Correction:")
 		hlECA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
 		hlECA.add(hlEC)
 		self.hlECbutton = gtk.CheckButton(None, False)
 		self.hlECbutton.connect("toggled", self.pcchanged)
+		self.skipECbutton = gtk.CheckButton(None, False)
+		self.skipECbutton.connect("toggled", self.pcchanged)
 		self.hlECcolor = gtk.ColorButton(gtk.gdk.color_parse("#FF00FF"))
 		self.hlECcolor.set_use_alpha(True)
 		self.hlECcolor.props.alpha = self.half
 		self.hlECcolor.connect("color-set", self.pcchanged)
 		detailstable.attach(hlECA, 0, 1, 10, 11, gtk.FILL, gtk.FILL, 2, 0)
-		detailstable.attach(self.hlECbutton, 1, 2, 10, 11, gtk.FILL, gtk.FILL, 0, 0)
-		detailstable.attach(self.hlECcolor, 2, 3, 10, 11, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+		detailstable.attach(self.skipECbutton, 1, 2, 10, 11, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlECbutton, 2, 3, 10, 11, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlECcolor, 3, 4, 10, 11, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 	
 		hlRem = gtk.Label("Remainder Bits:")
 		hlRemA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
 		hlRemA.add(hlRem)
 		self.hlRembutton = gtk.CheckButton(None, False)
 		self.hlRembutton.connect("toggled", self.pcchanged)
+		self.skipRembutton = gtk.CheckButton(None, False)
+		self.skipRembutton.connect("toggled", self.pcchanged)
 		self.hlRemcolor = gtk.ColorButton(gtk.gdk.color_parse("#FFC040"))
 		self.hlRemcolor.set_use_alpha(True)
 		self.hlRemcolor.props.alpha = self.half / 2 * 3
 		self.hlRemcolor.connect("color-set", self.pcchanged)
 		detailstable.attach(hlRemA, 0, 1, 11, 12, gtk.FILL, gtk.FILL, 2, 0)
-		detailstable.attach(self.hlRembutton, 1, 2, 11, 12, gtk.FILL, gtk.FILL, 0, 0)
-		detailstable.attach(self.hlRemcolor, 2, 3, 11, 12, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+		detailstable.attach(self.skipRembutton, 1, 2, 11, 12, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlRembutton, 2, 3, 11, 12, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlRemcolor, 3, 4, 11, 12, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 	
 		hlVers = gtk.Label("Version Info:")
 		hlVersA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
 		hlVersA.add(hlVers)
 		self.hlVersbutton = gtk.CheckButton(None, False)
 		self.hlVersbutton.connect("toggled", self.pcchanged)
+		self.skipVersbutton = gtk.CheckButton(None, False)
+		self.skipVersbutton.connect("toggled", self.pcchanged)
 		self.hlVerscolor = gtk.ColorButton(gtk.gdk.color_parse("#FF8000"))
 		self.hlVerscolor.set_use_alpha(True)
 		self.hlVerscolor.props.alpha = self.half / 2 * 3
 		self.hlVerscolor.connect("color-set", self.pcchanged)
 		detailstable.attach(hlVersA, 0, 1, 12, 13, gtk.FILL, gtk.FILL, 2, 0)
-		detailstable.attach(self.hlVersbutton, 1, 2, 12, 13, gtk.FILL, gtk.FILL, 0, 0)
-		detailstable.attach(self.hlVerscolor, 2, 3, 12, 13, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+		detailstable.attach(self.skipVersbutton, 1, 2, 12, 13, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlVersbutton, 2, 3, 12, 13, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlVerscolor, 3, 4, 12, 13, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 	
 		hlForm = gtk.Label("Format Info:")
 		hlFormA = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
 		hlFormA.add(hlForm)
 		self.hlFormbutton = gtk.CheckButton(None, False)
 		self.hlFormbutton.connect("toggled", self.pcchanged)
+		self.skipFormbutton = gtk.CheckButton(None, False)
+		self.skipFormbutton.connect("toggled", self.pcchanged)
 		self.hlFormcolor = gtk.ColorButton(gtk.gdk.color_parse("#FFFF00"))
 		self.hlFormcolor.set_use_alpha(True)
 		self.hlFormcolor.props.alpha = self.half / 2 * 3
 		self.hlFormcolor.connect("color-set", self.pcchanged)
 		detailstable.attach(hlFormA, 0, 1, 13, 14, gtk.FILL, gtk.FILL, 2, 0)
-		detailstable.attach(self.hlFormbutton, 1, 2, 13, 14, gtk.FILL, gtk.FILL, 0, 0)
-		detailstable.attach(self.hlFormcolor, 2, 3, 13, 14, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
+		detailstable.attach(self.skipFormbutton, 1, 2, 13, 14, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlFormbutton, 2, 3, 13, 14, gtk.FILL, gtk.FILL, 0, 0)
+		detailstable.attach(self.hlFormcolor, 3, 4, 13, 14, gtk.EXPAND|gtk.FILL, gtk.EXPAND|gtk.FILL, 0, 0)
 	
 	
 		frame = ExpanderFrame(detailstable, "Debug Settings")
