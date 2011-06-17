@@ -18,25 +18,24 @@ bool encodeData(bitstream* bs, const SymbolInfo* si)
 
 
 	bool (*encode)(bitstream* bs, const byte* data, int dataSize) = NULL; /* Mode specific encode routine */
-	CharacterCountBitsCount ccbc = 0;                                     /* Mode specific size of Character Count Information */
+	int ccbc = 0;                                                         /* Mode specific size of Character Count Information */
 
 	switch(si->encodeMode) {
 	case ModeByte:
-		ccbc = CountByte;
 		encode = &encodeByte;
 	break;
 	case ModeAlpha:
-		ccbc = CountAlpha;
 		encode = &encodeAlpha;
 	break;
 	case ModeNumeric:
-		ccbc = CountNumeric;
 		encode = &encodeNumeric;
 	break;
 	default:
 		error("Mode not supported: %d", si->encodeMode);
 		return false;
 	}
+
+	ccbc = getCharacterCountBitCount(si->encodeMode, si->version);
 
 	bs_add_b(bs, si->encodeMode, 4);                          /* add Mode information*/
 	bs_add_i(bs, si->dataCount, ccbc);                        /* add Character count information */
@@ -63,22 +62,22 @@ bool encodeData(bitstream* bs, const SymbolInfo* si)
 }
 
 
-int getBitCount(int numChars, EncodeModeIndicator mode)
+int getBitCount(int numChars, EncodeModeIndicator mode, int version)
 {
 	switch(mode) {
 	case ModeNumeric:
-		return 4 + CountNumeric + 10 * (numChars / 3) + ((numChars % 3 == 0) ? 0 : ((numChars % 3 == 1) ? 4 : 7));
+		return 4 + getCharacterCountBitCount(mode, version) + 10 * (numChars / 3) + ((numChars % 3 == 0) ? 0 : ((numChars % 3 == 1) ? 4 : 7));
 	case ModeAlpha:
-		return 4 + CountAlpha + 11 * (numChars / 2) + 6 *(numChars % 2);
+		return 4 + getCharacterCountBitCount(mode, version) + 11 * (numChars / 2) + 6 *(numChars % 2);
 	case ModeByte:
-		return 4 + CountByte + 8 * numChars;
+		return 4 + getCharacterCountBitCount(mode, version) + 8 * numChars;
 	}
 	return 0;
 }
 
-int getByteCount(int numChars, EncodeModeIndicator mode)
+int getByteCount(int numChars, EncodeModeIndicator mode, int version)
 {
-	int tmp = getBitCount(numChars, mode);
+	int tmp = getBitCount(numChars, mode, version);
 	return tmp / 8 + ((tmp % 8) ? 1 : 0);
 }
 
@@ -180,5 +179,46 @@ byte alphaValue(byte alpha)
 	error("Character not usable in alpha mode: %c", alpha);
 
 	return -1;
+}
 
+int getCharacterCountBitCount(EncodeModeIndicator mode, int version)
+{
+/*
+ * Version    Numeric   Alpha   Byte
+ * 1 -  9     10         9       8
+ * 10 - 26    12        11      16
+ * 27 - 40	  13        13      16
+ */
+	switch(mode)
+	{
+	case ModeNumeric:
+		if (version >= 1 && version <= 9)
+			return 10;
+		else if (version >= 10 && version <= 26)
+			return 12;
+		else if (version >= 27 && version <= 40)
+			return 13;
+		break;
+	case ModeAlpha:
+		if (version >= 1 && version <= 9)
+			return 9;
+		else if (version >= 10 && version <= 26)
+			return 11;
+		else if (version >= 27 && version <= 40)
+			return 13;
+		break;
+	case ModeByte:
+		if (version >= 1 && version <= 9)
+			return 8;
+		else if (version >= 10 && version <= 26)
+			return 16;
+		else if (version >= 27 && version <= 40)
+			return 16;
+		break;
+	default:
+		error("Mode %d invalid", mode);
+		return -1;
+	}
+	error("Version  %d invalid", version);
+	return -1;
 }

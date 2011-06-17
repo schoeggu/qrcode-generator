@@ -165,7 +165,7 @@ bool si_encode(SymbolInfo* si)
 	si->ecCodeWords = get_ec_codewords(si->version, si->ecLevel);
 	si->dataCodeWords = get_data_codewords(si->version, si->ecLevel);
 	si->blockInfo = get_block_info(si->version, si->ecLevel);
-	si->encodedDataCount = getByteCount(si->dataCount, si->encodeMode);
+	si->encodedDataCount = getByteCount(si->dataCount, si->encodeMode, si->version);
 	
 	/* 2. encode data */
 	bitstream* bs = bs_init();
@@ -208,11 +208,13 @@ bool si_encode(SymbolInfo* si)
 
 int get_min_version(int dataCount, int encMode, int ecLevel) 
 {
-	dataCount = getByteCount(dataCount, encMode);
+	int byteCount;
 	int i;
 	if (dataCount < 0 || ecLevel < 0 || ecLevel > 3) return 0;
-	for (i = 0; i < 40; i++) {
-		if (get_data_codewords(i+1, ecLevel) >= dataCount) return i+1;
+	for (i = 1; i <= 40; i++) {
+		//at version 10 and 27 The characterCountDataLength changes, so recalculate the whole length 
+		if (i == 1 || i == 10 || i == 27) byteCount = getByteCount(dataCount, encMode, i);
+		if (get_data_codewords(i, ecLevel) >= byteCount) return i;
 	}
 	return 0;
 }
