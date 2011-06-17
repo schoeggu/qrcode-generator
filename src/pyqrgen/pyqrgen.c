@@ -21,10 +21,9 @@ static PyObject* pyqrgen_set_version(PyObject* self, PyObject* args)
 {
 	int version;
 	if (PyArg_ParseTuple(args, "i", &version)) {
-		si_set_version(si, version);
+		return PyBool_FromLong(si_set_version(si, version));
 	}
-	Py_INCREF(Py_None);
-	return Py_None;
+	Py_RETURN_FALSE;
 }
 
 static PyObject* pyqrgen_set_auto_version(PyObject* self, PyObject* args) 
@@ -36,7 +35,7 @@ static PyObject* pyqrgen_set_data(PyObject* self, PyObject* args)
 {
 	int len;
 	char* data;
-	if (PyArg_ParseTuple(args, "s|i", &data, &len)) {
+	if (PyArg_ParseTuple(args, "si", &data, &len)) {
 		return PyBool_FromLong(si_set_data(si, (byte*)data, len));
 	}
 	Py_RETURN_FALSE;
@@ -106,7 +105,7 @@ static PyObject* pyqrgen_set_position(PyObject* self, PyObject* args)
 {
 	double x;
 	double y;
-	if (PyArg_ParseTuple(args, "d|d", &x, &y)) {
+	if (PyArg_ParseTuple(args, "dd", &x, &y)) {
 		return PyBool_FromLong(pc_set_position(pc, x, y));
 	}
 	Py_RETURN_FALSE;
@@ -115,8 +114,8 @@ static PyObject* pyqrgen_set_position(PyObject* self, PyObject* args)
 static PyObject* pyqrgen_set_size(PyObject* self, PyObject* args)
 {
 	int size;
-	bool isBitSize;
-	if (PyArg_ParseTuple(args, "i|i", &size, &isBitSize)) {
+	int isBitSize;
+	if (PyArg_ParseTuple(args, "ii", &size, &isBitSize)) {
 		return PyBool_FromLong(pc_set_size(pc, size, isBitSize));
 	}
 	Py_RETURN_FALSE;
@@ -124,7 +123,7 @@ static PyObject* pyqrgen_set_size(PyObject* self, PyObject* args)
 
 static PyObject* pyqrgen_set_is_bit_size(PyObject* self, PyObject* args)
 {
-	bool isBitSize;
+	int isBitSize;
 	if (PyArg_ParseTuple(args, "i", &isBitSize)) {
 		return PyBool_FromLong(pc_set_is_bit_size(pc, isBitSize));
 	}
@@ -133,7 +132,7 @@ static PyObject* pyqrgen_set_is_bit_size(PyObject* self, PyObject* args)
 
 static PyObject* pyqrgen_draw_quiet_zone(PyObject* self, PyObject* args)
 {
-	bool drawQuietZone;
+	int drawQuietZone;
 	if (PyArg_ParseTuple(args, "i", &drawQuietZone)) {
 		return PyBool_FromLong(pc_draw_quiet_zone(pc, drawQuietZone));
 	}
@@ -142,7 +141,7 @@ static PyObject* pyqrgen_draw_quiet_zone(PyObject* self, PyObject* args)
 
 static PyObject* pyqrgen_set_quiet_zone_size(PyObject* self, PyObject* args)
 {
-	bool quietZoneSize;
+	int quietZoneSize;
 	if (PyArg_ParseTuple(args, "i", &quietZoneSize)) {
 		return PyBool_FromLong(pc_set_quiet_zone_size(pc, quietZoneSize));
 	}
@@ -151,7 +150,7 @@ static PyObject* pyqrgen_set_quiet_zone_size(PyObject* self, PyObject* args)
 
 static PyObject* pyqrgen_calculate_optimal_size(PyObject* self, PyObject* args)
 {
-	bool calcOptimalSize;
+	int calcOptimalSize;
 	if (PyArg_ParseTuple(args, "i", &calcOptimalSize)) {
 		return PyBool_FromLong(pc_calculate_optimal_size(pc, calcOptimalSize));
 	}
@@ -161,7 +160,7 @@ static PyObject* pyqrgen_calculate_optimal_size(PyObject* self, PyObject* args)
 static PyObject* pyqrgen_set_foreground(PyObject* self, PyObject* args)
 {
 	double r,g,b,a;
-	if (PyArg_ParseTuple(args, "d|d|d|d", &r, &g, &b, &a)) {
+	if (PyArg_ParseTuple(args, "dddd", &r, &g, &b, &a)) {
 		color c = {r / USHRT_MAX, g / USHRT_MAX, b / USHRT_MAX, a / USHRT_MAX};
 		return PyBool_FromLong(pc_set_foreground_color(pc, c));
 	}
@@ -171,7 +170,7 @@ static PyObject* pyqrgen_set_foreground(PyObject* self, PyObject* args)
 static PyObject* pyqrgen_set_background(PyObject* self, PyObject* args)
 {
 	double r,g,b,a;
-	if (PyArg_ParseTuple(args, "d|d|d|d", &r, &g, &b, &a)) {
+	if (PyArg_ParseTuple(args, "dddd", &r, &g, &b, &a)) {
 		color c = {r / USHRT_MAX, g / USHRT_MAX, b / USHRT_MAX, a / USHRT_MAX};
 		return PyBool_FromLong(pc_set_background_color(pc, c));
 	}
@@ -180,7 +179,7 @@ static PyObject* pyqrgen_set_background(PyObject* self, PyObject* args)
 
 static PyObject* pyqrgen_enable_draw_raster(PyObject* self, PyObject* args)
 {
-	bool drawRaster;
+	int drawRaster;
 	if (PyArg_ParseTuple(args, "i", &drawRaster)) {
 		return PyBool_FromLong(pc_set_draw_raster(pc, drawRaster));
 	}
@@ -189,7 +188,7 @@ static PyObject* pyqrgen_enable_draw_raster(PyObject* self, PyObject* args)
 
 static PyObject* pyqrgen_enable_dont_mask(PyObject* self, PyObject* args)
 {
-	bool dontMask;
+	int dontMask;
 	if (PyArg_ParseTuple(args, "i", &dontMask)) {
 		return PyBool_FromLong(pc_set_dont_mask(pc, dontMask));
 	}
@@ -198,7 +197,7 @@ static PyObject* pyqrgen_enable_dont_mask(PyObject* self, PyObject* args)
 
 static PyObject* pyqrgen_enable_dont_draw_data(PyObject* self, PyObject* args)
 {
-	bool noData;
+	int noData;
 	if (PyArg_ParseTuple(args, "i", &noData)) {
 		return PyBool_FromLong(pc_set_draw_no_data(pc, noData));
 	}
@@ -217,8 +216,8 @@ static PyObject* pyqrgen_set_skipped_zones(PyObject* self, PyObject* args)
 static PyObject* pyqrgen_skip_zone(PyObject* self, PyObject* args)
 {
 	int zone;
-	bool skip;
-	if (PyArg_ParseTuple(args, "i|i", &zone, &skip)) {
+	int skip;
+	if (PyArg_ParseTuple(args, "ii", &zone, &skip)) {
 		return PyBool_FromLong(pc_skip_zone(pc, zone, skip));
 	}
 	Py_RETURN_FALSE;
@@ -236,8 +235,8 @@ static PyObject* pyqrgen_set_highlighted_zones(PyObject* self, PyObject* args)
 static PyObject* pyqrgen_highlight_zone(PyObject* self, PyObject* args)
 {
 	int zone;
-	bool hi;
-	if (PyArg_ParseTuple(args, "i|i", &zone, &hi)) {
+	int hi;
+	if (PyArg_ParseTuple(args, "ii", &zone, &hi)) {
 		return PyBool_FromLong(pc_highlight_zone(pc, zone, hi));
 	}
 	Py_RETURN_FALSE;
@@ -247,7 +246,7 @@ static PyObject* pyqrgen_set_highlight_color(PyObject* self, PyObject* args)
 {
 	int zone;
 	double r,g,b,a;
-	if (PyArg_ParseTuple(args, "i|d|d|d|d", &zone, &r, &g, &b, &a)) {
+	if (PyArg_ParseTuple(args, "idddd", &zone, &r, &g, &b, &a)) {
 		color c = {r / USHRT_MAX, g / USHRT_MAX, b / USHRT_MAX, a / USHRT_MAX};
 		return PyBool_FromLong(pc_set_highlight_color(pc, zone, c));
 	}
